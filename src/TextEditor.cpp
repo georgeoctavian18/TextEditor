@@ -99,7 +99,7 @@ int main()
                 ArrowKey(CurrLine, CurrCol, CharsPerLine, Lines, TabsLocation);
                 break;
             case CR:
-                EnterKey(CurrLine, CurrCol, Lines, EnterLines);
+                EnterKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine);
                 break;
             case TAB:
                 TabKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine);
