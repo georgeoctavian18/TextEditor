@@ -1,9 +1,9 @@
 #include "KeyActions.h"
 
 
-void EnterKey(int& currLine, int& currCol, vector <string> &lines, vector <int>& enterLines)
+void EnterKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines)
 {
-    for(int i = 0; i < enterLines.size(); i++)
+    for (int i = 0; i < enterLines.size(); i++)
         if (enterLines[i] >= currLine)
             enterLines[i]++;
 
@@ -24,14 +24,19 @@ void EnterKey(int& currLine, int& currCol, vector <string> &lines, vector <int>&
 
 void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, vector <pair<int, int>>& tabsLocation, int charsPerLine, char ch)
 {
+    int spacePos;
+    bool isNextLine = false;
+
     string s;
     CharToString(s, ch);
 
     InitLine(currLine, lines);
 
+    ///if (currCol == lines[currLine].size())
+        //lines[currLine].push_back(ch);
     lines[currLine].insert(currCol, s);
 
-    for (int i = 0; i < tabsLocation.size(); i++)
+    /*for (int i = 0; i < tabsLocation.size(); i++)
         if (tabsLocation[i].first == currLine && tabsLocation[i].second >= currCol)
         {
             if (tabsLocation[i].second + 4 == charsPerLine)
@@ -40,31 +45,72 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
                 tabsLocation.erase(tabsLocation.begin() + i);
             }
             else tabsLocation[i].second++;
-        }
-    currCol++;
+        }*/
+    
 
     if (lines[currLine].size() > charsPerLine)
     {
         int i = currLine;
         while (i < lines.size() && lines[i].size() > charsPerLine)
         {
-             if (i == lines.size() - 1) 
+            if (i == lines.size() - 1)
                 InitLine(i + 1, lines);
 
-             if (find(enterLines.begin(), enterLines.end(), i) != enterLines.end())
-             {
-                 lines.insert(lines.begin() + i + 1, "");
-                 for (int j = 0; j < enterLines.size(); j++)
-                     if (enterLines[j] >= i)
-                         enterLines[j]++;
-             }
+            if (find(enterLines.begin(), enterLines.end(), i) != enterLines.end())
+            {
+                lines.insert(lines.begin() + i + 1, "");
+                for (int j = 0; j < enterLines.size(); j++)
+                    if (enterLines[j] >= i)
+                        enterLines[j]++;
+            }
 
-             CharToString(s, lines[i].back());
-             lines[i].erase(lines[i].end() - 1);
-             lines[i + 1].insert(0, s);
-             i++;
+            while (lines[i].size() > charsPerLine)
+            {
+                spacePos = lines[i].find_last_of(' ');
+                int j = lines[i].size() - 1;
 
-            for (int j = 0; j < tabsLocation.size(); j++)
+                if (spacePos + 1 >= charsPerLine || spacePos == -1)
+                {
+                    CharToString(s, lines[i].back());
+                    lines[i].erase(lines[i].end() - 1);
+                    lines[i + 1].insert(0, s);
+                }
+                else
+                {
+                    if (lines[i + 1].size() == 1 && (lines[i + 1].front() >= ' ' && lines[i + 1].front() <= '~'))
+                        lines[i + 1].insert(0, " ");
+                    else if (lines[i + 1].size() > 1)
+                        lines[i + 1].insert(0, " ");
+
+                    while (j > spacePos)
+                    {
+                        CharToString(s, lines[i].back());
+                        lines[i].erase(lines[i].end() - 1);
+                        lines[i + 1].insert(0, s);
+                        j--;
+                    }
+                    lines[i].erase(lines[i].end() - 1);
+                    if (i == currLine) currCol--;
+                }
+            }
+
+            if (i == currLine)
+            {
+                if (currCol > spacePos && spacePos != -1)
+                {
+                    currCol -= spacePos;
+                    isNextLine = true;
+                }
+                else
+                {
+                    currCol++;
+                    if (currCol > charsPerLine)
+                        currCol = 1, isNextLine = true;
+                }  
+            }
+            i++;
+
+            /*for (int j = 0; j < tabsLocation.size(); j++)
                 if (tabsLocation[j].first == i)
                 {
                     if (tabsLocation[j].second + 4 == charsPerLine)
@@ -73,28 +119,28 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
                         tabsLocation.erase(tabsLocation.begin() + j);
                     }
                     else tabsLocation[j].second++;
-                }
+                }*/
         }
     }
-    if (currCol > charsPerLine) currCol = 1, currLine++;
-  
+    else currCol++;
+
+    if (isNextLine)
+        currLine++;
 }
 
 void TabKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, vector <pair<int, int>>& tabsLocation, int charsPerLine)
 {
-    if (currCol + 4 > charsPerLine)
-    {
+    if (currCol + 3 > charsPerLine)
         currLine++, currCol = 0;
-    }
 
-    int cLine = currLine, cCol = currCol;
+    //int cLine = currLine, cCol = currCol;
 
     InsertKey(currLine, currCol, lines, enterLines, tabsLocation, charsPerLine, ' ');
     InsertKey(currLine, currCol, lines, enterLines, tabsLocation, charsPerLine, ' ');
     InsertKey(currLine, currCol, lines, enterLines, tabsLocation, charsPerLine, ' ');
     InsertKey(currLine, currCol, lines, enterLines, tabsLocation, charsPerLine, ' ');
 
-    tabsLocation.push_back({ cLine, cCol });
+    //tabsLocation.push_back({ cLine, cCol });
 
 }
 
@@ -105,7 +151,7 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
     int command = getch();
     if (command == KEY_RIGHT)
     {
-        for (auto it : tabsLocation)
+       /*for (auto it : tabsLocation)
             if (it.first == currLine && it.second == currCol)
             {
                 currCol += 4;
@@ -115,7 +161,7 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
                     currLine++;
                 }
                 return;
-            }
+            }*/
 
         if (currCol == lines[currLine].size())
         {
@@ -129,8 +175,8 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
     }
     else if (command == KEY_LEFT)
     {
-        for (auto it : tabsLocation)
-            if ((it.first == currLine && it.second + 4 == currCol)  )
+        /*for (auto it : tabsLocation)
+            if ((it.first == currLine && it.second + 4 == currCol))
             {
                 currCol -= 4;
                 if (currCol < 0)
@@ -140,6 +186,7 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
                 }
                 return;
             }
+            */
 
         if (currCol == 0)
         {
@@ -155,13 +202,13 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
     {
         currLine++;
 
-        for (auto it : tabsLocation)
+        /*for (auto it : tabsLocation)
             if (it.first == currLine && (currCol - it.second > 0 && currCol - it.second < 4))
             {
                 if (currCol - it.second == 1)
                     currCol = it.second;
                 else currCol = it.second + 4;
-            }
+            }*/
 
         currCol = min(currCol, lines[currLine].size());
     }
@@ -169,13 +216,13 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
     {
         currLine--;
 
-        for (auto it : tabsLocation)
+       /*for (auto it : tabsLocation)
             if (it.first == currLine && (currCol - it.second > 0 && currCol - it.second < 4))
             {
                 if (currCol - it.second == 1)
                     currCol = it.second;
                 else currCol = it.second + 4;
-            }
+            }*/
 
         currCol = min(currCol, lines[currLine].size());
     }
@@ -195,7 +242,7 @@ void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, int chars
             i++;
         }
         currCol--;
-       // if(lines[i].empty())
+        // if(lines[i].empty())
 
     }
 }

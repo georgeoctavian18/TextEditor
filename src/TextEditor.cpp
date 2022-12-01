@@ -32,9 +32,9 @@ int main()
     unsigned prevtime, time_;
     prevtime = time_ = time(NULL);
     int frameCount = 0;
-  
 
-    
+
+
     vector <string> Lines;
     vector <int> EnterLines;
     vector <pair<int, int>> TabsLocation;
@@ -42,12 +42,12 @@ int main()
     int CurrLine, CurrCol;
     int PosX, PosY, CharsPerLine;
     int a, b, c, d;
-    
+
 
     Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, a, b, c, d);
-    
+
     InitLine(CurrLine, Lines);
-    
+
     line(a, b, c, d);
 
     while (true)
@@ -60,27 +60,27 @@ int main()
             frameCount = 0;
         }
         prevtime = time_;
-        
+
         //preframe
         isMouseClicked = isMouseClicked_helper;
 
         //frame
         background(WHITE);
-        
+
         for (int i = 0; i < 5; i++)
             clickDropdown(header[i]);
 
         disk(mousex(), mousey(), 10, (isMouseClicked ? COLOR(0, 255, 0) : COLOR(255, 0, 0)), COLOR(0, 255, 0));
 
         for (int i = 0; i < 5; i++)
-           display(header[i]);
+            display(header[i]);
 
         PrintText(Lines, PosX, PosY);
         PrintCursor(PosX + CurrCol * CHAR_DIST, PosY + CurrLine * LINE_WIDTH,
-                    PosX + CurrCol * CHAR_DIST, PosY + (CurrLine + 1) * LINE_WIDTH, BLACK);
-        
+            PosX + CurrCol * CHAR_DIST, PosY + (CurrLine + 1) * LINE_WIDTH, BLACK);
+
         swapbuffers();
-        
+
         //afterframe
         if (isMouseClicked)
             isMouseClicked_helper = false;
@@ -92,7 +92,7 @@ int main()
             Ch = getch();
 
             if (Ch == ESC) break;
-  
+
             switch (Ch)
             {
             case 0:
@@ -113,7 +113,7 @@ int main()
 
             a = c = PosX + CurrCol * CHAR_DIST;
             b = PosY + CurrLine * LINE_WIDTH, d = PosY + (CurrLine + 1) * LINE_WIDTH;
-            
+
             //cout << CurrLine << ' ' << CurrCol << '\n';
             delay(15);
         }
