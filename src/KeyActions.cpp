@@ -89,6 +89,7 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
                         lines[i + 1].insert(0, s);
                         j--;
                     }
+
                     lines[i].erase(lines[i].end() - 1);
                     if (i == currLine) currCol--;
                 }
@@ -98,7 +99,7 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
             {
                 if (currCol > spacePos && spacePos != -1)
                 {
-                    currCol -= spacePos;
+                    currCol -= spacePos - 1;
                     isNextLine = true;
                 }
                 else
