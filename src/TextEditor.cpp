@@ -96,7 +96,7 @@ int main()
             switch (Ch)
             {
             case 0:
-                ArrowKey(CurrLine, CurrCol, CharsPerLine, Lines, TabsLocation);
+                SpecialKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, TabsLocation);
                 break;
             case CR:
                 EnterKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine);

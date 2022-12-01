@@ -166,7 +166,7 @@ void TabKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& e
 }
 
 
-void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <pair<int, int>> tabsLocation)
+void SpecialKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines, vector <pair<int, int>> tabsLocation)
 {
     delay(15);
     int command = getch();
@@ -246,6 +246,26 @@ void ArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lin
             }*/
 
         currCol = min(currCol, lines[currLine].size());
+    }
+    else if (command == KEY_END)
+    {
+        if(currCol != lines[currLine].size())
+             currCol = lines[currLine].size();
+        else if (!count(enterLines.begin(), enterLines.end(), currLine) && currLine < lines.size() - 1)
+        {
+            currLine++;
+            currCol = lines[currLine].size();
+        }
+    }
+    else if (command == KEY_HOME)
+    {
+        if (currCol)
+            currCol = 0;
+        else if (!count(enterLines.begin(), enterLines.end(), currLine - 1) && currLine > 0)
+        {
+            currLine--;
+            currCol = 0;
+        }
     }
 }
 
