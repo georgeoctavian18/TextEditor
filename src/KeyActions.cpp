@@ -1,23 +1,45 @@
 #include "KeyActions.h"
 
 
-void EnterKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines)
+void EnterKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, vector <pair<int, int>>& tabsLocation, int charsPerLine)
 {
+    string s;
+
     for (int i = 0; i < enterLines.size(); i++)
         if (enterLines[i] >= currLine)
             enterLines[i]++;
-
     enterLines.push_back(currLine);
 
-    string s = lines[currLine].substr(currCol);
-    lines[currLine].erase(currCol);
+    if (count(enterLines.begin(), enterLines.end(), currLine + 1))
+    {
 
-    currLine++;
+        s = lines[currLine].substr(currCol);
+        lines[currLine].erase(currCol);
+
+        currLine++;
+
+        if (currLine + 1 > lines.size())
+            lines.push_back(s);
+        else lines.insert(lines.begin() + currLine, s);
+    }
+    else
+    {
+        if (currLine + 1 > lines.size())
+        {
+            CharToString(s, ' ');
+            lines.push_back(s);
+        }
+        int line = currLine + 1, col = 0;
+        for (int i = currCol; i < lines[currLine].size(); i++)
+            InsertKey(line, col, lines, enterLines, tabsLocation, charsPerLine, lines[currLine][i]);
+  
+        lines[currLine].erase(currCol);
+        currLine++;
+
+    }
+
     currCol = 0;
 
-    if (currLine + 1 > lines.size())
-        lines.push_back(s);
-    else lines.insert(lines.begin() + currLine, s);
 
 }
 
@@ -32,8 +54,6 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
 
     InitLine(currLine, lines);
 
-    ///if (currCol == lines[currLine].size())
-        //lines[currLine].push_back(ch);
     lines[currLine].insert(currCol, s);
 
     /*for (int i = 0; i < tabsLocation.size(); i++)
