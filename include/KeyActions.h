@@ -12,4 +12,4 @@ void TabKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& e
 
 void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, vector <pair<int, int>>& tabsLocation, int charsPerLine, char ch);
 
-void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, int charsPerLine);
+void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, int charsPerLine);
