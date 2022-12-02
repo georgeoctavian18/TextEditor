@@ -43,7 +43,6 @@ void EnterKey(int& currLine, int& currCol, vector <string>& lines, vector <int>&
 
 }
 
-
 void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, vector <pair<int, int>>& tabsLocation, int charsPerLine, char ch)
 {
     int spacePos;
@@ -76,7 +75,7 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
             if (i == lines.size() - 1)
                 InitLine(i + 1, lines);
 
-            if (find(enterLines.begin(), enterLines.end(), i) != enterLines.end())
+            if (count(enterLines.begin(), enterLines.end(), i))
             {
                 lines.insert(lines.begin() + i + 1, "");
                 for (int j = 0; j < enterLines.size(); j++)
@@ -97,10 +96,10 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
                 }
                 else
                 {
-                    if (lines[i + 1].size() == 1 && (lines[i + 1].front() >= ' ' && lines[i + 1].front() <= '~'))
+                    /*if (lines[i + 1].size() == 1 && (lines[i + 1].front() >= ' ' && lines[i + 1].front() <= '~'))
                         lines[i + 1].insert(0, " ");
                     else if (lines[i + 1].size() > 1)
-                        lines[i + 1].insert(0, " ");
+                        lines[i + 1].insert(0, " ");*/
 
                     while (j > spacePos)
                     {
@@ -110,8 +109,8 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
                         j--;
                     }
 
-                    lines[i].erase(lines[i].end() - 1);
-                    if (i == currLine) currCol--;
+                   //lines[i].erase(lines[i].end() - 1);
+                    //if (i == currLine) currCol--;
                 }
             }
 
@@ -119,7 +118,7 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
             {
                 if (currCol > spacePos && spacePos != -1)
                 {
-                    currCol -= spacePos - 1;
+                    currCol -= spacePos;
                     isNextLine = true;
                 }
                 else
@@ -164,7 +163,6 @@ void TabKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& e
     //tabsLocation.push_back({ cLine, cCol });
 
 }
-
 
 void SpecialKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines, vector <pair<int, int>> tabsLocation)
 {
@@ -269,21 +267,90 @@ void SpecialKey(int& currLine, int& currCol, int charsPerLine, vector <string> l
     }
 }
 
-void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, int charsPerLine)
+void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, int charsPerLine)
 {
+    bool ok = false;
+    if (!currLine && !currCol) return;
+    
     if (currCol)
     {
-        lines[currLine].erase(currCol - 1, currCol);
-
-        int i = currLine;
-        while (lines[i].size() + 1 == charsPerLine && i < lines.size() - 1)
+        lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
+        currCol--;
+    }
+    else
+    {
+        
+        if (count(enterLines.begin(), enterLines.end(), currLine - 1))
         {
-            lines[i].push_back(lines[i + 1].front());
-            lines[i + 1].erase(lines[i].begin(), lines[i].begin() + 1);
+            auto pos = find(enterLines.begin(), enterLines.end(), currLine - 1);
+            enterLines.erase(pos);
+        }
+        ok = true;
+        currLine--;
+        currCol = lines[currLine].size();
+    }
+
+    int i = currLine;
+    
+    if (count(enterLines.begin(), enterLines.end(), i) && ok)
+    {
+        int emptySpace = charsPerLine - lines[i].size();
+        
+        while (emptySpace && lines[i + 1].size())
+        {
+            char ch = lines[i + 1].front();
+            lines[i].push_back(ch);
+            lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + 1);
+            emptySpace--;
+        }
+        if (!lines[i + 1].size())
+        {
+            for (int j = i + 1; j < lines.size() - 1; j++)
+                lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
+            lines.pop_back();
+        }
+    }
+    else
+    {
+        while (!count(enterLines.begin(), enterLines.end(), i) && i < lines.size() - 1)
+        {
+            int j = 0, emptySpace = charsPerLine - lines[i].size();
+
+            while (emptySpace >= j && lines[i + 1].size())
+            {
+
+                while (lines[i + 1][j] != ' ' && j < lines[i + 1].size())
+                    j++;
+
+                if (lines[i + 1][j] == ' ' && !j)
+                    j = 1;
+
+                if (j <= emptySpace)
+                {
+                    string s = lines[i + 1].substr(0, j);
+                    lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + j);
+                    lines[i] += s;
+                    j = 0;
+                }
+                else if (lines[i].back() != ' ' && lines[i + 1].front() != ' ' && emptySpace >= 0)
+                {
+                    string s = lines[i + 1].substr(0, emptySpace);
+                    lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + emptySpace);
+                    lines[i] += s;
+                }
+                emptySpace = charsPerLine - lines[i].size();
+            }
+            if (lines[i + 1].empty())
+            {
+                for (int j = i + 1; j < lines.size() - 1; j++)
+                    lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
+
+                    for (int j = 0; j < enterLines.size(); j++)
+                        if (enterLines[j] > i)
+                            enterLines[j]--;
+                lines.pop_back();
+            }
             i++;
         }
-        currCol--;
-        // if(lines[i].empty())
-
     }
 }

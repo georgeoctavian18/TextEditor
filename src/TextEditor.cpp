@@ -105,7 +105,7 @@ int main()
                 TabKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine);
                 break;
             case BS:
-                BackspaceKey(CurrLine, CurrCol, Lines, CharsPerLine);
+                BackspaceKey(CurrLine, CurrCol, Lines, EnterLines, CharsPerLine);
                 break;
             default:
                 InsertKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine, Ch);
