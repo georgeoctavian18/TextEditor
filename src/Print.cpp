@@ -21,5 +21,5 @@ void PrintText(vector <string> lines, int posX, int posY)
         outtextxy(posX, yTemp, PrintArray);
         yTemp += LINE_WIDTH;
     }
-    
+
 }

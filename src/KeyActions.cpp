@@ -32,7 +32,7 @@ void EnterKey(int& currLine, int& currCol, vector <string>& lines, vector <int>&
         int line = currLine + 1, col = 0;
         for (int i = currCol; i < lines[currLine].size(); i++)
             InsertKey(line, col, lines, enterLines, tabsLocation, charsPerLine, lines[currLine][i]);
-  
+
         lines[currLine].erase(currCol);
         currLine++;
 
@@ -65,7 +65,7 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
             }
             else tabsLocation[i].second++;
         }*/
-    
+
 
     if (lines[currLine].size() > charsPerLine)
     {
@@ -126,7 +126,7 @@ void InsertKey(int& currLine, int& currCol, vector <string>& lines, vector <int>
                     currCol++;
                     if (currCol > charsPerLine)
                         currCol = 1, isNextLine = true;
-                }  
+                }
             }
             i++;
 
@@ -229,7 +229,7 @@ void SpecialKey(int& currLine, int& currCol, int charsPerLine, vector <string> l
                 else currCol = it.second + 4;
             }*/
 
-        currCol = min(currCol, lines[currLine].size());
+        currCol = (currCol<lines[currLine].size()?currCol:lines[currLine].size()); //min(currCol, lines[currLine].size());
     }
     else if (command == KEY_UP && currLine > 0)
     {
@@ -243,7 +243,7 @@ void SpecialKey(int& currLine, int& currCol, int charsPerLine, vector <string> l
                 else currCol = it.second + 4;
             }*/
 
-        currCol = min(currCol, lines[currLine].size());
+        currCol = (currCol<lines[currLine].size()?currCol:lines[currLine].size()); //min(currCol, lines[currLine].size());
     }
     else if (command == KEY_END)
     {
@@ -271,7 +271,7 @@ void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, vector <i
 {
     bool ok = false;
     if (!currLine && !currCol) return;
-    
+
     if (currCol)
     {
         lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
@@ -279,7 +279,7 @@ void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, vector <i
     }
     else
     {
-        
+
         if (count(enterLines.begin(), enterLines.end(), currLine - 1))
         {
             auto pos = find(enterLines.begin(), enterLines.end(), currLine - 1);
@@ -291,11 +291,11 @@ void BackspaceKey(int& currLine, int& currCol, vector <string>& lines, vector <i
     }
 
     int i = currLine;
-    
+
     if (count(enterLines.begin(), enterLines.end(), i) && ok)
     {
         int emptySpace = charsPerLine - lines[i].size();
-        
+
         while (emptySpace && lines[i + 1].size())
         {
             char ch = lines[i + 1].front();

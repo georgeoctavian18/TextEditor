@@ -38,5 +38,5 @@ void setOptions()
     setcolor(0);
     settextstyle(8, HORIZ_DIR, 2);
     setfillstyle(SOLID_FILL, 15);
-    
+
 }
