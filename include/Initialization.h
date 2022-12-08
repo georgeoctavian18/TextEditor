@@ -7,11 +7,16 @@
 #include "graphics.h"
 #pragma comment(lib,"graphics.lib")
 #include "winbgim.h"
+#include <ctime>
+#include <chrono>
+#include <fstream>
 
 using namespace std;
 
 #define CHAR_DIST 12
 #define LINE_WIDTH 20
+#define CHAR_WIDTH 12
+#define CHAR_HEIGHT 20
 #define CR 13
 #define ESC 27
 #define TAB 9
