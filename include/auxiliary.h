@@ -48,7 +48,7 @@ void filledRect(float x, float y, float w, float h, int fillColor, int borderCol
 void statusBar(int lin, int col)
 {
     filledRect(0, HEIGHT - 50, 200, 50, COLOR(255, 255, 255), COLOR(0, 0, 0));
-    bgiout << "Lin " << lin << ", Col " << col;
+    bgiout << "Lin " << lin + 1 << ", Col " << col + 1;
     setbkcolor(WHITE);
     outstreamxy(10, HEIGHT - 40);
 }
