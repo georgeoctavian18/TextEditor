@@ -25,10 +25,9 @@ int main()
 
     vector <string> Lines;
     vector <int> EnterLines;
-    vector <pair<int, int>> TabsLocation;
     char Ch;
     int CurrLine, CurrCol;
-    int PosX, PosY, CharsPerLine;
+    int PosX, PosY, CharsPerLine, Command;
     int a, b, c, d;
 
     Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, a, b, c, d);
@@ -59,19 +58,21 @@ int main()
                 windowShouldClose = true;
                 break;
             case 0:
-                SpecialKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, TabsLocation);
+                //delay(15);
+                Command = getch();
+                SpecialKey(CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines);
                 break;
             case CR:
-                EnterKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine);
+                EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
                 break;
             case TAB:
-                TabKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine);
+                TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
                 break;
             case BS:
-                BackspaceKey(CurrLine, CurrCol, Lines, EnterLines, CharsPerLine);
+                BackspaceKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
                 break;
             default:
-                InsertKey(CurrLine, CurrCol, Lines, EnterLines, TabsLocation, CharsPerLine, Ch);
+                InsertKey(CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines);
             }
 
             a = c = PosX + CurrCol * CHAR_DIST;

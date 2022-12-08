@@ -53,8 +53,8 @@ void clickOnText(int& CurrLine, int& CurrCol, vector<string>& Lines)
         if (mouse.y < textBeginY)
             CurrLine = 0;
         else
-            if (mouse.y > textBeginY + (Lines.size()) * CHAR_HEIGHT)
-                CurrLine = Lines.size();
+            if (mouse.y > textBeginY + (Lines.size() - 1) * CHAR_HEIGHT)
+                CurrLine = Lines.size() - 1;
             else
                 CurrLine = (mouse.y - textBeginY) / CHAR_HEIGHT;
 
