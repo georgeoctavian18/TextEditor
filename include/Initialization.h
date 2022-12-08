@@ -33,4 +33,4 @@ void CharToString(string& s, char c);
 
 void InitLine(int currLine, vector <string> &lines);
 
-void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& a, int& b, int& c, int& d);
+void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& rowsPerFrame, int& a, int& b, int& c, int& d);

@@ -6,7 +6,7 @@ void PrintCursor(int x1, int y1, int x2, int y2, int color)
     line(x1, y1, x2, y2);
 }
 
-void PrintText(vector <string> lines, int posX, int posY)
+void PrintText(int posX, int posY, int beginFrame, int endFrame, vector <string> lines)
 {
     setcolor(BLACK);
     setbkcolor(WHITE);
@@ -15,7 +15,7 @@ void PrintText(vector <string> lines, int posX, int posY)
     char PrintArray[256];
     int yTemp = posY;
 
-    for (int i = 0; i < lines.size(); i++)
+    for (int i = beginFrame; i <= min(endFrame, lines.size() - 1); i++)
     {
         StringToArray(lines[i], PrintArray);
         outtextxy(posX, yTemp, PrintArray);

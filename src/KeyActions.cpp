@@ -83,10 +83,6 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                 }
                 else
                 {
-                    /*if (lines[i + 1].size() == 1 && (lines[i + 1].front() >= ' ' && lines[i + 1].front() <= '~'))
-                        lines[i + 1].insert(0, " ");
-                    else if (lines[i + 1].size() > 1)
-                        lines[i + 1].insert(0, " ");*/
 
                     while (j > spacePos)
                     {
@@ -96,8 +92,6 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                         j--;
                     }
 
-                   //lines[i].erase(lines[i].end() - 1);
-                    //if (i == currLine) currCol--;
                 }
             }
 
@@ -123,127 +117,6 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
 
     if (isNextLine)
         currLine++;
-}
-
-void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
-{
-    if (currCol + 3 > charsPerLine)
-        currLine++, currCol = 0;
-
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-
-}
-
-void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int> enterLines)
-{
-    
-    switch (command)
-    {
-    case KEY_RIGHT:
-        RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    case KEY_LEFT:
-        LeftArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    case KEY_UP:
-        UpArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    case KEY_DOWN:
-        DownArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    case KEY_HOME:
-        HomeKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    case KEY_END:
-        EndKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    case KEY_DELETE:
-        DeleteKey(currLine, currCol, charsPerLine, lines, enterLines);
-        break;
-    }  
-    
-}
-
-void RightArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
-{
-    if (currCol == lines[currLine].size() || (currCol == lines[currLine].size() - 1 && !count(enterLines.begin(), enterLines.end(), currLine)))
-    {
-        if (lines.size() != currLine + 1)
-        {
-            currCol = 0;
-            currLine++;
-        }
-        else if (currCol != lines[currLine].size()) currCol++;
-    }
-    else if (currCol != lines[currLine].size()) currCol++;
-}
-
-void LeftArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
-{
-    if (currCol == 0)
-    {
-        if (currLine > 0)
-        {
-            currLine--;
-            currCol = lines[currLine].size();
-
-            if (!count(enterLines.begin(), enterLines.end(), currLine) && lines[currLine][currCol - 1] != ' ')
-                currCol--;
-        }
-    }
-    else currCol--;
-}
-
-void UpArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
-{
-    if (currLine > 0)
-    {
-        currLine--;
-        currCol = currCol < lines[currLine].size() ? currCol : lines[currLine].size();
-    }
-}
-
-void DownArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
-{
-    if (lines.size() != currLine + 1)
-    {
-        currLine++;
-        currCol = currCol < lines[currLine].size() ? currCol : lines[currLine].size();
-    }
-}
-
-void HomeKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
-{
-    if (currCol)
-        currCol = 0;
-    else if (!count(enterLines.begin(), enterLines.end(), currLine - 1) && currLine > 0)
-    {
-        currLine--;
-        currCol = 0;
-    }
-}
-
-void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
-{
-    if (currCol != lines[currLine].size())
-        currCol = lines[currLine].size();
-    else if (!count(enterLines.begin(), enterLines.end(), currLine) && currLine < lines.size() - 1)
-    {
-        currLine++;
-        currCol = lines[currLine].size();
-    }
-}
-
-void DeleteKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
-{
-    int last = currCol;
-    RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
-
-    if(last != currCol)
-        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines);
 }
 
 void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
@@ -332,12 +205,136 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
                 for (int j = i + 1; j < lines.size() - 1; j++)
                     lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
 
-                    for (int j = 0; j < enterLines.size(); j++)
-                        if (enterLines[j] > i)
-                            enterLines[j]--;
+                for (int j = 0; j < enterLines.size(); j++)
+                    if (enterLines[j] > i)
+                        enterLines[j]--;
                 lines.pop_back();
             }
             i++;
         }
     }
+}
+
+void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+{
+    if (currCol + 3 > charsPerLine)
+        currLine++, currCol = 0;
+
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
+
+}
+
+void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int> enterLines, bool& wordWrap)
+{
+    
+    switch (command)
+    {
+    case KEY_RIGHT:
+        RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_LEFT:
+        LeftArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_UP:
+        UpArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_DOWN:
+        DownArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_HOME:
+        HomeKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_END:
+        EndKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_DELETE:
+        DeleteKey(currLine, currCol, charsPerLine, lines, enterLines);
+        break;
+    case KEY_INSERT:
+        wordWrap = wordWrap ? false : true;
+        if (wordWrap) DoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
+    }  
+    
+}
+
+void RightArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
+{
+    if (currCol == lines[currLine].size() || (currCol == lines[currLine].size() - 1 && !count(enterLines.begin(), enterLines.end(), currLine)))
+    {
+        if (lines.size() != currLine + 1)
+        {
+            currCol = 0;
+            currLine++;
+        }
+        else if (currCol != lines[currLine].size()) currCol++;
+    }
+    else if (currCol != lines[currLine].size()) currCol++;
+}
+
+void LeftArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
+{
+    if (currCol == 0)
+    {
+        if (currLine > 0)
+        {
+            currLine--;
+            currCol = lines[currLine].size();
+
+            if (!count(enterLines.begin(), enterLines.end(), currLine) && lines[currLine][currCol - 1] != ' ')
+                currCol--;
+        }
+    }
+    else currCol--;
+}
+
+void UpArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
+{
+    if (currLine > 0)
+    {
+        currLine--;
+        currCol = currCol < lines[currLine].size() ? currCol : lines[currLine].size();
+    }
+}
+
+void DownArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
+{
+    if (lines.size() != currLine + 1)
+    {
+        currLine++;
+        currCol = currCol < lines[currLine].size() ? currCol : lines[currLine].size();
+    }
+}
+
+void HomeKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
+{
+    if (currCol)
+        currCol = 0;
+    else if (!count(enterLines.begin(), enterLines.end(), currLine - 1) && currLine > 0)
+    {
+        currLine--;
+        currCol = 0;
+    }
+}
+
+void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
+{
+    if (currCol != lines[currLine].size())
+        currCol = lines[currLine].size();
+    else if (!count(enterLines.begin(), enterLines.end(), currLine) && currLine < lines.size() - 1)
+    {
+        currLine++;
+        currCol = lines[currLine].size();
+    }
+}
+
+void DeleteKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+{
+    int last = currCol;
+    RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+
+    if(last != currCol)
+        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines);
 }

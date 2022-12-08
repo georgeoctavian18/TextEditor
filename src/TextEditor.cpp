@@ -27,10 +27,14 @@ int main()
     vector <int> EnterLines;
     char Ch;
     int CurrLine, CurrCol;
-    int PosX, PosY, CharsPerLine, Command;
+    int PosX, PosY, CharsPerLine, RowsPerFrame, Command;
     int a, b, c, d;
 
-    Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, a, b, c, d);
+    Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, RowsPerFrame, a, b, c, d);
+
+    int BeginFrame = 0, EndFrame = RowsPerFrame - 1;
+
+    bool WordWrap = false;
 
     InitLine(CurrLine, Lines);
 
@@ -60,7 +64,7 @@ int main()
             case 0:
                 //delay(15);
                 Command = getch();
-                SpecialKey(CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines);
+                SpecialKey(CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
@@ -90,10 +94,16 @@ int main()
         //FRAME
         background(WHITE);
 
-        PrintText(Lines, PosX, PosY);
-        if ((millis()-lastCursorChanged)/500%2==0)
-            PrintCursor(PosX + CurrCol * CHAR_DIST, PosY + CurrLine * LINE_WIDTH,
-                PosX + CurrCol * CHAR_DIST, PosY + (CurrLine + 1) * LINE_WIDTH, BLACK);
+        if (CurrLine > EndFrame)
+            BeginFrame++, EndFrame++;
+        else if (CurrLine < BeginFrame)
+            BeginFrame--, EndFrame--;
+
+        PrintText(PosX, PosY, BeginFrame, EndFrame, Lines);
+
+        if ((millis() - lastCursorChanged) / 500 % 2 == 0)
+            PrintCursor(PosX + CurrCol * CHAR_DIST, PosY + (CurrLine - BeginFrame) * LINE_WIDTH,
+                PosX + CurrCol * CHAR_DIST, PosY + (CurrLine - BeginFrame + 1) * LINE_WIDTH, BLACK);
 
         display(header, nr_header);
 
