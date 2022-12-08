@@ -1,16 +1,18 @@
 #include "KeyActions.h"
 
 
-void EnterKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+void EnterKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
     string s;
+
+    InitLine(currLine, lines);
 
     for (int i = 0; i < enterLines.size(); i++)
         if (enterLines[i] >= currLine)
             enterLines[i]++;
     enterLines.push_back(currLine);
 
-    if (count(enterLines.begin(), enterLines.end(), currLine + 1))
+    if (count(enterLines.begin(), enterLines.end(), currLine + 1) || !wordWrap)
     {
 
         s = lines[currLine].substr(currCol);
@@ -31,7 +33,7 @@ void EnterKey(int& currLine, int& currCol, int charsPerLine, vector <string>& li
         }
         int line = currLine + 1, col = 0;
         for (int i = currCol; i < lines[currLine].size(); i++)
-            InsertKey(line, col, charsPerLine, lines[currLine][i], lines, enterLines);
+            InsertKey(line, col, charsPerLine, lines[currLine][i], lines, enterLines, wordWrap);
 
         lines[currLine].erase(currCol);
         currLine++;
@@ -42,7 +44,7 @@ void EnterKey(int& currLine, int& currCol, int charsPerLine, vector <string>& li
 
 }
 
-void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines)
+void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
     int spacePos;
     bool isNextLine = false;
@@ -53,6 +55,12 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
     InitLine(currLine, lines);
 
     lines[currLine].insert(currCol, s);
+
+    if(!wordWrap)
+    {
+        currCol++;
+        return;
+    }
 
     if (lines[currLine].size() > charsPerLine)
     {
@@ -119,88 +127,54 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
         currLine++;
 }
 
-void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
     bool ok = false;
     if (!currLine && !currCol) return;
 
-    if (currCol)
+    if (wordWrap)
     {
-        lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
-
-        if (!lines[currLine].size())
-            currCol = lines[--currLine].size();
-        else currCol--;
-    }
-    else
-    {
-        currCol = lines[currLine - 1].size();
-        if (count(enterLines.begin(), enterLines.end(), currLine - 1))
+        if (currCol)
         {
-            auto pos = find(enterLines.begin(), enterLines.end(), currLine - 1);
-            enterLines.erase(pos);
+            lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
+
+            if (!lines[currLine].size() && currLine)
+                currCol = lines[--currLine].size();
+            else currCol--;
         }
         else
         {
-            lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
-            currCol--;
-        }
-
-        ok = true;
-        currLine--;
-    }
-
-    int i = currLine;
-
-    if (count(enterLines.begin(), enterLines.end(), i) && ok)
-    {
-        int emptySpace = charsPerLine - lines[i].size();
-
-        while (emptySpace && lines[i + 1].size())
-        {
-            char ch = lines[i + 1].front();
-            lines[i].push_back(ch);
-            lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + 1);
-            emptySpace--;
-        }
-        if (!lines[i + 1].size())
-        {
-            for (int j = i + 1; j < lines.size() - 1; j++)
-                lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
-            lines.pop_back();
-        }
-    }
-    else
-    {
-        while (!count(enterLines.begin(), enterLines.end(), i) && i < lines.size() - 1)
-        {
-            int j = 0, emptySpace = charsPerLine - lines[i].size();
-
-            while (emptySpace >= j && lines[i + 1].size())
+            currCol = lines[currLine - 1].size();
+            if (count(enterLines.begin(), enterLines.end(), currLine - 1))
             {
-
-                while (lines[i + 1][j] != ' ' && j < lines[i + 1].size())
-                    j++;
-
-                if (lines[i + 1][j] == ' ' && !j)
-                    j = 1;
-
-                if (j <= emptySpace)
-                {
-                    string s = lines[i + 1].substr(0, j);
-                    lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + j);
-                    lines[i] += s;
-                    j = 0;
-                }
-                else if (lines[i].back() != ' ' && lines[i + 1].front() != ' ' && emptySpace >= 0)
-                {
-                    string s = lines[i + 1].substr(0, emptySpace);
-                    lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + emptySpace);
-                    lines[i] += s;
-                }
-                emptySpace = charsPerLine - lines[i].size();
+                auto pos = find(enterLines.begin(), enterLines.end(), currLine - 1);
+                enterLines.erase(pos);
             }
-            if (lines[i + 1].empty())
+            else
+            {
+                lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
+                currCol--;
+            }
+
+            ok = true;
+            currLine--;
+
+        }
+
+        int i = currLine;
+
+        if (count(enterLines.begin(), enterLines.end(), i) && ok)
+        {
+            int emptySpace = charsPerLine - lines[i].size();
+
+            while (emptySpace && lines[i + 1].size())
+            {
+                char ch = lines[i + 1].front();
+                lines[i].push_back(ch);
+                lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + 1);
+                emptySpace--;
+            }
+            if (!lines[i + 1].size())
             {
                 for (int j = i + 1; j < lines.size() - 1; j++)
                     lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
@@ -208,23 +182,116 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
                 for (int j = 0; j < enterLines.size(); j++)
                     if (enterLines[j] > i)
                         enterLines[j]--;
+
                 lines.pop_back();
             }
-            i++;
+        }
+        else
+        {
+            while (!count(enterLines.begin(), enterLines.end(), i) && i < lines.size() - 1)
+            {
+                int j = 0, emptySpace = charsPerLine - lines[i].size();
+
+                while (emptySpace >= j && lines[i + 1].size())
+                {
+
+                    while (lines[i + 1][j] != ' ' && j < lines[i + 1].size())
+                        j++;
+
+                    if (lines[i + 1][j] == ' ' && !j)
+                        j = 1;
+
+                    if (j <= emptySpace)
+                    {
+                        string s = lines[i + 1].substr(0, j);
+                        lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + j);
+                        lines[i] += s;
+                        j = 0;
+                    }
+                    else if (lines[i].back() != ' ' && lines[i + 1].front() != ' ' && emptySpace >= 0)
+                    {
+                        string s = lines[i + 1].substr(0, emptySpace);
+                        lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + emptySpace);
+                        lines[i] += s;
+                    }
+                    emptySpace = charsPerLine - lines[i].size();
+                }
+                if (lines[i + 1].empty())
+                {
+                    for (int j = i + 1; j < lines.size() - 1; j++)
+                        lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
+
+                    for (int j = 0; j < enterLines.size(); j++)
+                        if (enterLines[j] > i)
+                            enterLines[j]--;
+                    lines.pop_back();
+                }
+                i++;
+            }
         }
     }
+    else
+    {
+        if (currCol)
+        {
+            lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
+            currCol--;
+        }
+        else
+        {
+            if (count(enterLines.begin(), enterLines.end(), currLine - 1))
+            {
+                auto pos = find(enterLines.begin(), enterLines.end(), currLine - 1);
+                enterLines.erase(pos);
+            }
+            else
+            {
+                lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
+                currCol--;
+            }
+
+            ok = true;
+            currLine--;
+            currCol = lines[currLine].size();
+        }
+
+        int i = currLine;
+
+        if (ok)
+        {
+
+            while (lines[i + 1].size())
+            {
+                char ch = lines[i + 1].front();
+                lines[i].push_back(ch);
+                lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + 1);
+            }
+            if (!lines[i + 1].size())
+            {
+                for (int j = i + 1; j < lines.size() - 1; j++)
+                    lines[j].replace(lines[j].begin(), lines[j].end(), lines[j + 1]);
+
+                for (int j = 0; j < enterLines.size(); j++)
+                    if (enterLines[j] > i)
+                        enterLines[j]--;
+
+                lines.pop_back();
+            }
+        }
+
+    }
+     
 }
 
-void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
     if (currCol + 3 > charsPerLine)
         currLine++, currCol = 0;
 
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines);
-
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
 }
 
 void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int> enterLines, bool& wordWrap)
@@ -251,11 +318,12 @@ void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vect
         EndKey(currLine, currCol, charsPerLine, lines, enterLines);
         break;
     case KEY_DELETE:
-        DeleteKey(currLine, currCol, charsPerLine, lines, enterLines);
+        DeleteKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
         break;
     case KEY_INSERT:
         wordWrap = wordWrap ? false : true;
         if (wordWrap) DoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
+        else UndoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
     }  
     
 }
@@ -330,11 +398,11 @@ void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines
     }
 }
 
-void DeleteKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+void DeleteKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
     int last = currCol;
     RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
 
     if(last != currCol)
-        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines);
+        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
 }
