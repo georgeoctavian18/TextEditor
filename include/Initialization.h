@@ -27,7 +27,7 @@ using namespace std;
 
 void setOptions();
 
-void StringToArray(string s, char arr[]);
+void StringToArray(string& s, char arr[]);
 
 void CharToString(string& s, char c);
 

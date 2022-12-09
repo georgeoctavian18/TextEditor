@@ -32,11 +32,12 @@ int main()
 
     Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, RowsPerFrame, a, b, c, d);
 
-    int BeginFrame = 0, EndFrame = RowsPerFrame - 1;
+    int LineBeginFrame = 0, LineEndFrame = RowsPerFrame - 1;
+    int ColBeginFrame = 0, ColEndFrame = CharsPerLine;
 
     bool WordWrap = false;
 
-    InitLine(CurrLine, Lines);
+    //InitLine(CurrLine, Lines);
 
     while (!windowShouldClose)
     {
@@ -62,30 +63,26 @@ int main()
                 windowShouldClose = true;
                 break;
             case 0:
-                //delay(15);
                 Command = getch();
                 SpecialKey(CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case CR:
-                EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
+                EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case TAB:
-                TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
+                TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case BS:
-                BackspaceKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
+                BackspaceKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             default:
-                InsertKey(CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines);
+                InsertKey(CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, WordWrap);
             }
 
             a = c = PosX + CurrCol * CHAR_DIST;
             b = PosY + CurrLine * LINE_WIDTH, d = PosY + (CurrLine + 1) * LINE_WIDTH;
 
-
             lastCursorChanged=millis();
-            //cout << CurrLine << ' ' << CurrCol << '\n';
-            //delay(15);
         }
 
         //AFTERUPDATE
@@ -94,16 +91,26 @@ int main()
         //FRAME
         background(WHITE);
 
-        if (CurrLine > EndFrame)
-            BeginFrame++, EndFrame++;
-        else if (CurrLine < BeginFrame)
-            BeginFrame--, EndFrame--;
+        if (CurrLine > LineEndFrame)
+            LineBeginFrame++, LineEndFrame++;
+        else if (CurrLine < LineBeginFrame)
+            LineBeginFrame--, LineEndFrame--;
 
-        PrintText(PosX, PosY, BeginFrame, EndFrame, Lines);
+        if (CurrCol > ColEndFrame)
+            ColBeginFrame++, ColEndFrame++;
+        else if (CurrCol < ColBeginFrame)
+        {
+            if (CurrCol == Lines[CurrLine].size())
+                ColBeginFrame = 0, ColEndFrame = CharsPerLine;
+            else ColBeginFrame--, ColEndFrame--;
+        }     
+
+
+        PrintText(PosX, PosY, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, Lines);
 
         if ((millis() - lastCursorChanged) / 500 % 2 == 0)
-            PrintCursor(PosX + CurrCol * CHAR_DIST, PosY + (CurrLine - BeginFrame) * LINE_WIDTH,
-                PosX + CurrCol * CHAR_DIST, PosY + (CurrLine - BeginFrame + 1) * LINE_WIDTH, BLACK);
+            PrintCursor(PosX + (CurrCol - ColBeginFrame) * CHAR_DIST, PosY + (CurrLine - LineBeginFrame) * LINE_WIDTH,
+                        PosX + (CurrCol - ColBeginFrame) * CHAR_DIST, PosY + (CurrLine - LineBeginFrame + 1) * LINE_WIDTH, BLACK);
 
         display(header, nr_header);
 

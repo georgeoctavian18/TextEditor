@@ -8,11 +8,12 @@ void CharToString(string& s, char c)
     s.push_back(c);
 }
 
-void StringToArray(string s, char arr[])
+void StringToArray(string& s, char arr[])
 {
     for (int i = 0; i < s.size(); i++)
         arr[i] = s[i];
     arr[s.size()] = '\0';
+    s.clear();
 }
 
 void InitLine(int currLine, vector <string> &lines)

@@ -4,7 +4,7 @@
 
 void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
 {
-    int spacePos, i = currLine;
+    int spacePos, i = 0;
     string s;
 
     currLine = currCol = 0;
@@ -46,4 +46,9 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
         }
         i++;
     }
+}
+
+void UndoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
+{
+
 }
