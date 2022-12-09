@@ -18,7 +18,7 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
 
     for (int i = lineBeginFrame; i < min(lineEndFrame + 1, lines.size()); i++)
     {
-        for (int j = colBeginFrame; j < min(colEndFrame + 1, lines[i].size()); j++)
+        for (int j = colBeginFrame; j < min(colEndFrame, lines[i].size()); j++)
             s.push_back(lines[i][j]);
 
         StringToArray(s, PrintArray);
