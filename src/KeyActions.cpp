@@ -65,12 +65,12 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
     if (lines[currLine].size() > charsPerLine)
     {
         int i = currLine;
-        while (i < lines.size() && lines[i].size() > charsPerLine)
+        while (i < lines.size())
         {
-            if (i == lines.size() - 1)
+            if (i == lines.size() - 1 && lines[i].size() > charsPerLine)
                 InitLine(i + 1, lines);
 
-            if (count(enterLines.begin(), enterLines.end(), i))
+            if (count(enterLines.begin(), enterLines.end(), i) && lines[i].size() > charsPerLine)
             {
                 lines.insert(lines.begin() + i + 1, "");
                 for (int j = 0; j < enterLines.size(); j++)
@@ -294,7 +294,7 @@ void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& line
     InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
 }
 
-void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int> enterLines, bool& wordWrap)
+void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, bool& wordWrap)
 {
     
     switch (command)

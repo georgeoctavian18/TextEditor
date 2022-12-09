@@ -9,12 +9,12 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
 
     currLine = currCol = 0;
 
-    while (i < lines.size() && lines[i].size() > charsPerLine)
+    while (i < lines.size())
     {
-        if (i == lines.size() - 1)
+        if (i == lines.size() - 1 && lines[i].size() > charsPerLine)
             InitLine(i + 1, lines);
 
-        if (count(enterLines.begin(), enterLines.end(), i))
+        if (count(enterLines.begin(), enterLines.end(), i) && lines[i].size() > charsPerLine)
         {
             lines.insert(lines.begin() + i + 1, "");
             for (int j = 0; j < enterLines.size(); j++)
@@ -46,9 +46,33 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
         }
         i++;
     }
+
 }
 
 void UndoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
 {
+    int i = 1, pos = 0;
 
+    currLine = currCol = 0;
+
+    while (i < lines.size())
+    {
+        if (count(enterLines.begin(), enterLines.end(), i - 1))
+        {
+            pos++;
+            lines[pos] = lines[i];
+        }
+        else
+        {
+            lines[pos] += lines[i];
+            lines[i].clear();
+        }
+        i++;
+    }
+    while (pos + 1 < lines.size())
+        lines.pop_back();
+
+    enterLines.clear();
+    for (int i = 0; i <= pos; i++)
+        enterLines.push_back(i);
 }
