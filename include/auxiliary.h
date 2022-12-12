@@ -45,9 +45,23 @@ void filledRect(float x, float y, float w, float h, int fillColor, int borderCol
     rectangle(x, y, x + w, y + h);
 }
 
-void statusBar(int lin, int col)
+void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines)
 {
     filledRect(0, HEIGHT - 50, 200, 50, COLOR(255, 255, 255), COLOR(0, 0, 0));
+    int i, lin, col, maxi;
+    lin = 0;
+    maxi = 0;
+    for (i=0; i<(int)enterLines.size(); i++)
+        if (enterLines[i]<CurrLine)
+        {
+            lin++;
+            if (enterLines[i]>maxi)
+                maxi = enterLines[i];
+        }
+    col=0;
+    for (i=maxi; i<CurrLine; i++)
+        col+=lines[i].size();
+    col+=CurrCol;
     bgiout << "Lin " << lin + 1 << ", Col " << col + 1;
     setbkcolor(WHITE);
     outstreamxy(10, HEIGHT - 40);

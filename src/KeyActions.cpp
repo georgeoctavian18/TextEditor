@@ -280,7 +280,7 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
         }
 
     }
-     
+
 }
 
 void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
@@ -294,16 +294,27 @@ void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& line
     InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
 }
 
-void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, bool& wordWrap)
+void SpecialKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, bool& wordWrap)
 {
-    
+    int selectEndLine = currLine, selectEndCol = currCol;
+
+    if (selectBeginLine > selectEndLine || (selectBeginLine == selectEndLine && selectBeginCol > selectEndCol))
+    {
+        swap(selectBeginLine, selectEndLine);
+        swap(selectBeginCol, selectEndCol);
+    }
+
     switch (command)
     {
     case KEY_RIGHT:
-        RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+        if (selectBeginCol != selectEndCol || selectBeginLine != selectEndLine)
+            currCol = selectEndCol, currLine = selectEndLine;
+        else RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
         break;
     case KEY_LEFT:
-        LeftArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+        if (selectBeginCol != selectEndCol || selectBeginLine != selectEndLine)
+            currCol = selectBeginCol, currLine = selectBeginLine;
+        else LeftArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
         break;
     case KEY_UP:
         UpArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
@@ -320,12 +331,12 @@ void SpecialKey(int& currLine, int& currCol, int command, int charsPerLine, vect
     case KEY_DELETE:
         DeleteKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
         break;
-    case KEY_INSERT:
-        wordWrap = wordWrap ? false : true;
+    /*case KEY_INSERT:
+        wordWrap = !wordWrap;
         if (wordWrap) DoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
-        else UndoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
-    }  
-    
+        else UndoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);*/
+    }
+
 }
 
 void RightArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
