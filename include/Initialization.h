@@ -13,9 +13,9 @@
 
 using namespace std;
 
-#define CHAR_DIST 12
+#define CHAR_DIST 14
 #define LINE_WIDTH 20
-#define CHAR_WIDTH 12
+#define CHAR_WIDTH 14
 #define CHAR_HEIGHT 20
 #define CR 13
 #define ESC 27

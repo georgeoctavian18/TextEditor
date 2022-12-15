@@ -10,7 +10,10 @@ void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currC
         swap(selectBeginCol, currCol);
     }
     else if (selectBeginLine == currLine && selectBeginCol == currCol)
-        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);    
+    {
+        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+        return;
+    }
 
     while (currLine != selectBeginLine || currCol != selectBeginCol)
         BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
