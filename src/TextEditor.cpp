@@ -60,7 +60,6 @@ int main()
         {
 
             char Ch = getch();
-
             switch (Ch)
             {
             case ESC:
@@ -77,10 +76,10 @@ int main()
                 TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case BS:
-                BackspaceKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
+                Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
            default:
-               InsertKey(CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, WordWrap);
+               Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, WordWrap);
             }
 
             a = c = PosX + CurrCol * CHAR_DIST;
@@ -119,9 +118,8 @@ int main()
         //clickedOnHeader=false;
         clickDropdown(header, nr_header, clickedOnHeader);
         //if (!clickedOnHeader)
-            clickOnText(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, Lines);
+        clickOnText(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, Lines);
 
-        
 
         clickSlider(lineSlider);
 

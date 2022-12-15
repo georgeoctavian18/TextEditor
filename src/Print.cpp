@@ -47,13 +47,5 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
         
         yTemp += LINE_WIDTH;
     }
-    
-    //setbkcolor(COLOR(200, 200, 255));
-
-    /*for (int i = selectBeginLine; i <= selectEndLine; i++)
-    {
-
-    }*/
-
 
 }
