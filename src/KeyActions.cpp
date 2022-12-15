@@ -294,7 +294,7 @@ void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& line
     InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
 }
 
-void SpecialKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, bool& wordWrap)
+void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool& wordWrap, bool& keepSelect)
 {
     int selectEndLine = currLine, selectEndCol = currCol;
 
@@ -330,14 +330,24 @@ void SpecialKey(int selectBeginLine, int selectBeginCol, int& currLine, int& cur
         EndKey(currLine, currCol, charsPerLine, lines, enterLines);
         break;
     case KEY_DELETE:
-        DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+        DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
         break;
-    /*case KEY_INSERT:
-        wordWrap = !wordWrap;
-        if (wordWrap) DoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
-        else UndoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);*/
+    case KEY_F1:
+        Copy(selectBeginLine, selectBeginCol, currLine, currCol, lines, enterLines, copiedLines, enterLinesCopied, keepSelect);
+        break;
+    case KEY_F2:
+        Paste(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, copiedLines, enterLinesCopied, stackLines, stackEnterLines, stackLinCol, wordWrap);
+        break;
+    case KEY_F3:
+        Cut(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, copiedLines, enterLinesCopied, stackLines, stackEnterLines, stackLinCol, wordWrap, keepSelect);
+        break;
+    case KEY_F4:
+        SelectAll(selectBeginLine, selectBeginCol, currLine, currCol, lines, keepSelect);
+        break;
+    case KEY_F5:
+        Undo(currLine, currCol, lines, enterLines, stackLines, stackEnterLines, stackLinCol);
+        break;
     }
-
 }
 
 void RightArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
@@ -410,16 +420,20 @@ void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines
     }
 }
 
-void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
+void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap)
 {
-
     if (selectBeginLine == currLine && selectBeginCol == currCol)
     {
         int last = currCol;
+
+        stackLines.push(lines);
+        stackEnterLines.push(enterLines);
+        stackLinCol.push({ currLine, currCol });
+
         RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
 
         if (last != currCol)
             BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
     }
-    else Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+    else Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
 }
