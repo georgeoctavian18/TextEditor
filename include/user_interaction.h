@@ -51,7 +51,7 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
     if (Lines.size()>0 && isInsideRect(mouse, textScreen))
     {
         if (isMouseClicked)
-            {
+        {
             if (mouse.y < textBeginY)
                 CurrLine1 = LineBeginFrame;
             else
@@ -70,7 +70,7 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
         }
 
         if (isMouseDown)
-            {
+        {
             if (mouse.y < textBeginY)
                 CurrLine2 = LineBeginFrame;
             else

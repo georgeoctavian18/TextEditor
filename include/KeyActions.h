@@ -2,6 +2,7 @@
 #include "Initialization.h"
 #include "Print.h"
 #include "SettingsActions.h"
+#include "Actions.h"
 
 
 
@@ -23,7 +24,7 @@ void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines
 
 void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap);
 
-void DeleteKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap);
+void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap);
 
 void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines, bool wordWrap);
 

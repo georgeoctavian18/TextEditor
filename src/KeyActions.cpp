@@ -298,11 +298,12 @@ void SpecialKey(int selectBeginLine, int selectBeginCol, int& currLine, int& cur
 {
     int selectEndLine = currLine, selectEndCol = currCol;
 
-    if (selectBeginLine > selectEndLine || (selectBeginLine == selectEndLine && selectBeginCol > selectEndCol))
-    {
-        swap(selectBeginLine, selectEndLine);
-        swap(selectBeginCol, selectEndCol);
-    }
+    if (command == KEY_RIGHT || command == KEY_LEFT)
+        if (selectBeginLine > selectEndLine || (selectBeginLine == selectEndLine && selectBeginCol > selectEndCol))
+        {
+            swap(selectBeginLine, selectEndLine);
+            swap(selectBeginCol, selectEndCol);
+        }
 
     switch (command)
     {
@@ -329,7 +330,7 @@ void SpecialKey(int selectBeginLine, int selectBeginCol, int& currLine, int& cur
         EndKey(currLine, currCol, charsPerLine, lines, enterLines);
         break;
     case KEY_DELETE:
-        DeleteKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+        DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
         break;
     /*case KEY_INSERT:
         wordWrap = !wordWrap;
@@ -409,11 +410,16 @@ void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines
     }
 }
 
-void DeleteKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
+void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
-    int last = currCol;
-    RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
 
-    if(last != currCol)
-        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+    if (selectBeginLine == currLine && selectBeginCol == currCol)
+    {
+        int last = currCol;
+        RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
+
+        if (last != currCol)
+            BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+    }
+    else Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
 }

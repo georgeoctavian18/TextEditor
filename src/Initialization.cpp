@@ -16,7 +16,7 @@ void StringToArray(string& s, char arr[])
     s.clear();
 }
 
-void InitLine(int currLine, vector <string> &lines)
+void InitLine(int currLine, vector <string>& lines)
 {
     if (currLine + 1 > lines.size())
         lines.push_back("");
