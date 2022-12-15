@@ -27,8 +27,11 @@ int main()
     createSlider(lineSlider, WIDTH-30, header[0].rect.y+header[0].rect.height, 30, HEIGHT - (header[0].rect.y+header[0].rect.height), 0, 10, 5, 1);
 
 
-    vector <string> Lines;
-    vector <int> EnterLines;
+    vector <string> Lines, CopiedLines;
+    vector <int> EnterLines, EnterLinesCopied;
+    stack <vector <string>> StackLines;
+    stack <vector <int>>  StackEnterLines;
+    stack <pair<int, int>> StackLinCol;
     char Ch;
     int CurrLine, CurrCol, SelectBeginLine, SelectBeginCol;
     int PosX, PosY, CharsPerLine, RowsPerFrame, Command;
@@ -58,7 +61,7 @@ int main()
 
         if (kbhit())
         {
-
+            bool KeepSelect = false;
             char Ch = getch();
             switch (Ch)
             {
@@ -67,7 +70,7 @@ int main()
                 break;
             case 0:
                 Command = getch();
-                SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, WordWrap);
+                SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect);
                 break;
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
@@ -76,18 +79,21 @@ int main()
                 TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case BS:
-                Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
+                Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
                 break;
            default:
-               Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, WordWrap);
+               Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
             }
 
             a = c = PosX + CurrCol * CHAR_DIST;
             b = PosY + CurrLine * LINE_WIDTH, d = PosY + (CurrLine + 1) * LINE_WIDTH;
 
             lastCursorChanged=millis();
-            SelectBeginLine = CurrLine;
-            SelectBeginCol = CurrCol;
+            if (!KeepSelect)
+            {
+                SelectBeginLine = CurrLine;
+                SelectBeginCol = CurrCol;
+            }
         }
 
         if (CurrLine > LineEndFrame)
@@ -107,6 +113,13 @@ int main()
         if (header[2].isSelected && isClicked(header[2].options[0]))
         {
             WordWrap = !WordWrap;
+            while (!StackLines.empty())
+            {
+                StackLines.pop();
+                StackEnterLines.pop();
+                StackLinCol.pop();
+            }
+
             if (WordWrap) DoWordWrap(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
             else UndoWordWrap(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
             lastCursorChanged = millis();
@@ -156,7 +169,7 @@ int main()
 
         display(lineSlider);
         statusBar(CurrLine, CurrCol, Lines, EnterLines);
-        filledCircle(mousex(), mousey(), 5, (isMouseClicked ? COLOR(0, 255, 0) : COLOR(255, 0, 0)), COLOR(0, 255, 0));
+        //filledCircle(mousex(), mousey(), 5, (isMouseClicked ? COLOR(0, 255, 0) : COLOR(255, 0, 0)), COLOR(0, 255, 0));
 
         //AFTERFRAME
         swapbuffers();

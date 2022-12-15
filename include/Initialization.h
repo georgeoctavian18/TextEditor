@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stack>
 #include <cstring>
 #include <algorithm>
 #include "graphics.h"
