@@ -26,7 +26,9 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
 
         for (int j = colBeginFrame; j < min(colEndFrame, (int)lines[i].size()); j++)
         {
-            char PrintArray[2] = { lines[i][j] , '\0' };
+            char PrintArray[2] = { lines[i][j], '\0' };
+            if (lines[i][j] == '\t')
+                PrintArray[0] = ' ';
 
             if (selectBeginLine == selectEndLine && selectBeginCol == selectEndCol)
                 setbkcolor(WHITE);

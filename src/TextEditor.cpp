@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include "Initialization.h"
 #include "auxiliary.h"
@@ -81,9 +80,9 @@ int main()
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
-            case TAB:
+            /*case TAB:
                TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
-                break;
+                break;*/
             case BS:
                 Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
                 break;

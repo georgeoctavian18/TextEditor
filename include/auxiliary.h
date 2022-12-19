@@ -76,11 +76,11 @@ void movePage(int CurrLine, int CurrCol, int &LineBeginFrame, int &ColBeginFrame
 
     if (CurrCol > ColEndFrame)
         ColBeginFrame = CurrCol - CharsPerLine, ColEndFrame = CurrCol;
-    else if (CurrCol < ColBeginFrame)
+    else if (CurrCol <= ColBeginFrame)
     {
-        if (CurrCol == Lines[CurrLine].size())
+        if (CurrCol <= Lines[CurrLine].size())
             ColBeginFrame = 0, ColEndFrame = CharsPerLine;
-        else ColBeginFrame = CurrCol, ColEndFrame = CharsPerLine - CurrCol;
+        else ColBeginFrame = CurrCol, ColEndFrame--;
     }
 }
 
