@@ -45,12 +45,12 @@ void filledRect(float x, float y, float w, float h, int fillColor, int borderCol
     rectangle(x, y, x + w, y + h);
 }
 
-void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines)
+void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines, struct rectangle box)
 {
-    filledRect(0, HEIGHT - 50, 200, 50, COLOR(255, 255, 255), COLOR(0, 0, 0));
+    filledRect(box.x, box.y, box.width-1, box.height-1, COLOR(255, 255, 255), COLOR(0, 0, 0));
     int i, lin, col, maxi;
     lin = 0;
-    maxi = 0;
+    maxi = -1;
     for (i=0; i<(int)enterLines.size(); i++)
         if (enterLines[i]<CurrLine)
         {
@@ -59,15 +59,32 @@ void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& en
                 maxi = enterLines[i];
         }
     col=0;
-    for (i=maxi; i<CurrLine; i++)
+    for (i=maxi+1; i<CurrLine; i++)
         col+=lines[i].size();
     col+=CurrCol;
     bgiout << "Lin " << lin + 1 << ", Col " << col + 1;
     setbkcolor(WHITE);
-    outstreamxy(10, HEIGHT - 40);
+    outstreamxy(10, box.y+1);
 }
 
-unsigned startTime, lastCursorChanged;
+void movePage(int CurrLine, int CurrCol, int &LineBeginFrame, int &ColBeginFrame, int &LineEndFrame, int &ColEndFrame, int RowsPerFrame, int CharsPerLine, vector <string>& Lines)
+{
+    if (CurrLine > LineEndFrame)
+        LineBeginFrame = CurrLine - (RowsPerFrame - 1), LineEndFrame = CurrLine;
+    else if (CurrLine < LineBeginFrame)
+        LineBeginFrame = CurrLine, LineEndFrame = CurrLine + (RowsPerFrame - 1);
+
+    if (CurrCol > ColEndFrame)
+        ColBeginFrame = CurrCol - CharsPerLine, ColEndFrame = CurrCol;
+    else if (CurrCol < ColBeginFrame)
+    {
+        if (CurrCol == Lines[CurrLine].size())
+            ColBeginFrame = 0, ColEndFrame = CharsPerLine;
+        else ColBeginFrame = CurrCol, ColEndFrame = CharsPerLine - CurrCol;
+    }
+}
+
+unsigned startTime, lastCursorChanged, lastMouseClicked;
 
 unsigned millis() {
     using namespace std::chrono;

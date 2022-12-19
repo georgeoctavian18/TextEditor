@@ -22,6 +22,11 @@ using namespace std;
 #define ESC 27
 #define TAB 9
 #define BS 8
+#define CTRLX 'X'-'A'+1
+#define CTRLC 'C'-'A'+1
+#define CTRLV 'V'-'A'+1
+#define CTRLA 'A'-'A'+1
+#define CTRLZ 'Z'-'A'+1
 #define windSizeX 800
 #define windSizeY 600
 

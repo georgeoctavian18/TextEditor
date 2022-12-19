@@ -5,9 +5,13 @@
 
 bool isMouseDown = false;
 bool isMouseClicked = false;
+bool isMouseDoubleClicked = false;
 bool isMouseUp = true;
 bool isMouseClicked_helper = false;
+bool isMouseDoubleClicked_helper = false;
 bool windowShouldClose = false;
+bool beginSelection = false;
+bool functionMode = false;
 
 void mousePressed(int x, int y)
 {
@@ -16,6 +20,10 @@ void mousePressed(int x, int y)
     isMouseClicked_helper = true;
 }
 
+void mouseDoubleClicked(int x, int y)
+{
+    isMouseDoubleClicked_helper = true;
+}
 
 void mouseReleased(int x, int y)
 {
@@ -25,29 +33,37 @@ void mouseReleased(int x, int y)
 
 void setupFlags()
 {
-    lastCursorChanged = startTime = millis();
+    lastMouseClicked = lastCursorChanged = startTime = millis();
     registermousehandler(WM_LBUTTONDOWN, mousePressed);
     registermousehandler(WM_LBUTTONUP, mouseReleased);
+    registermousehandler(WM_LBUTTONDBLCLK, mouseDoubleClicked);
 }
 
 void updateFlags()
 {
     isMouseClicked = isMouseClicked_helper;
+    isMouseDoubleClicked = isMouseDoubleClicked_helper;
+    if (isMouseClicked)
+        lastMouseClicked = millis();
 }
 
 void clearFlags()
 {
     if (isMouseClicked)
         isMouseClicked_helper = false;
+    if (isMouseDoubleClicked)
+        isMouseDoubleClicked_helper = false;
 }
 
-void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, int LineBeginFrame, int LineEndFrame, int ColBeginFrame, int ColEndFrame, vector<string>& Lines)
+void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, int LineBeginFrame, int LineEndFrame, int ColBeginFrame, int ColEndFrame, vector<string>& Lines, struct rectangle textScreen)
 {
     int textBeginY = HEIGHT / 10;
     int textBeginX = CHAR_WIDTH;
-    int headerHeight = 30;
     vector2 mouse = { mousex(), mousey() };
+    /*
+    int headerHeight = 30;
     struct rectangle textScreen = { 0, headerHeight, WIDTH, HEIGHT - headerHeight };
+    */
     if (Lines.size()>0 && isInsideRect(mouse, textScreen))
     {
         if (isMouseClicked)
@@ -67,9 +83,14 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
                     CurrCol1 = min((int)Lines[CurrLine1].size(), ColEndFrame);
                 else
                     CurrCol1 = ColBeginFrame + (mouse.x - textBeginX + CHAR_WIDTH/2)/CHAR_WIDTH;
+            beginSelection = true;
+        }
+        else if (isMouseDoubleClicked)
+        {
+            /*selecteaza cuvant*/
         }
 
-        if (isMouseDown)
+        if (isMouseDown && beginSelection)
         {
             if (mouse.y < textBeginY)
                 CurrLine2 = LineBeginFrame;
@@ -88,6 +109,8 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
                     CurrCol2 = ColBeginFrame + (mouse.x - textBeginX + CHAR_WIDTH/2)/CHAR_WIDTH;
             lastCursorChanged = millis();
         }
+        else
+            beginSelection = false;
     }
 }
 
@@ -152,7 +175,7 @@ void createDropdown(dropdown& header, float x, float y, float w, float h, int de
 }
 
 
-void clickDropdown(dropdown& header, bool& optionSelected) {
+void clickDropdown(dropdown& header) {
     vector2 v = { mousex(), mousey() };
     bool res = isInsideRect(v, header.rect);
     if (isMouseClicked)
@@ -161,26 +184,12 @@ void clickDropdown(dropdown& header, bool& optionSelected) {
     header.col = (res ? header.hovering_col : header.default_col);
     if (header.isSelected)
         header.col = header.selected_col;
-    /*
-    optionSelected = false;
-    if (header.isSelected)
-        for (int i = 0; i < header.nr_options; i++)
-            optionSelected = optionSelected || isClicked(header.options[i]);
-    */
-
 }
 
-void clickDropdown(dropdown header[], int nr_header, bool& optionSelected)
+void clickDropdown(dropdown header[], int nr_header)
 {
-    optionSelected = false;
-    bool aux;
     for (int i = 0; i < nr_header; i++)
-    {
-        clickDropdown(header[i], aux);
-        optionSelected = optionSelected || aux;
-    }
-    for (int i = 0; i < nr_header; i++)
-        optionSelected = optionSelected || header[i].isSelected;
+        clickDropdown(header[i]);
 }
 
 void display(dropdown& header) {
@@ -208,7 +217,7 @@ void display(dropdown header[], int nr_header)
 struct slider{
     int state, maxState, minState, step;
     struct rectangle rect, mouseCatch;
-    bool selected;
+    bool selected, exists;
     int yoffset;
     //button increase, decrease;
 };
@@ -220,53 +229,54 @@ void createSlider(slider &s, float x, float y, float w, float h, int minState, i
     s.step = step;
     s.state = defaultState;
     s.selected = false;
+    s.exists = false;
 }
 
 void clickSlider(slider& s){
-   struct vector2 v = {mousex(), mousey()};
-    /*
-    if (isMouseDown){
-        if (isInsideRect(v, Vec2(map(state, minState, maxState, pos.x, pos.x+size), pos.y), r))
-            selected=1;
-    }
-    else
-        if (selected)
-            selected=0;
-    */
-    int total_states = (s.maxState-s.minState)/s.step;
-    int total_empty_space = s.rect.width * total_states;
-    int state_nr = (s.state-s.minState)/s.step;
-    int empty_space = s.rect.width * state_nr;
+    s.exists = (s.minState!=s.maxState);
 
-    s.mouseCatch = {s.rect.x, s.rect.y + empty_space, s.rect.width, s.rect.height - total_empty_space};
+    if (s.exists)
+    {
+        struct vector2 v = {mousex(), mousey()};
+        int total_states = (s.maxState-s.minState)/s.step;
+        int total_empty_space = s.rect.width * total_states;
 
-    if (isMouseClicked)
-        if (isInsideRect(v, s.mouseCatch))
-        {
-            s.selected = true;
-            s.yoffset = v.y - s.mouseCatch.y;
-        }
-    if (isMouseUp)
-        s.selected = false;
+        float height = max(s.rect.height - total_empty_space, s.rect.width*2);
+        float y = map(s.state, s.minState, s.maxState, s.rect.y, s.rect.y+s.rect.height - height);
 
-    if (s.selected){
-        if (v.y>=s.rect.y - s.mouseCatch.height + s.yoffset)
-            s.state = s.maxState;
-        else if (v.y<=s.rect.y + s.yoffset)
-            s.state = s.minState;
-        else{
-            s.state = map(v.y-s.yoffset, s.rect.y, s.rect.y - s.mouseCatch.height, s.minState, s.maxState);
-            s.state = s.state-s.state%s.step;
+        s.mouseCatch = {s.rect.x, y, s.rect.width, height};
+
+        if (isMouseClicked)
+            if (isInsideRect(v, s.mouseCatch))
+            {
+                s.selected = true;
+                s.yoffset = v.y - s.mouseCatch.y;
+            }
+        if (isMouseUp)
+            s.selected = false;
+
+        if (s.selected){
+            if (v.y>=s.rect.y + s.rect.height - s.mouseCatch.height + s.yoffset)
+                s.state = s.maxState;
+            else if (v.y<=s.rect.y + s.yoffset)
+                s.state = s.minState;
+            else{
+                s.state = map(v.y-s.yoffset, s.rect.y, s.rect.y + s.rect.height - s.mouseCatch.height, s.minState, s.maxState);
+                s.state = s.state-s.state%s.step;
+            }
         }
     }
 
 }
 
 void display(slider &s){
-    int bgcol = COLOR(230, 230, 230);
-    int catchcol = COLOR(150, 150, 150);
-    filledRect(s.rect.x, s.rect.y, s.rect.width, s.rect.height, bgcol, bgcol);
-    filledRect(s.mouseCatch.x, s.mouseCatch.y, s.mouseCatch.width, s.mouseCatch.height, catchcol, catchcol);
+    if (s.exists)
+    {
+        int bgcol = COLOR(230, 230, 230);
+        int catchcol = COLOR(150, 150, 150);
+        filledRect(s.rect.x, s.rect.y, s.rect.width, s.rect.height, bgcol, bgcol);
+        filledRect(s.mouseCatch.x, s.mouseCatch.y, s.mouseCatch.width, s.mouseCatch.height, catchcol, catchcol);
+    }
 }
 
 #endif // USER_INTERACTION_H_INCLUDED

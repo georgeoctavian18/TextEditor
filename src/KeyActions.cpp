@@ -288,10 +288,10 @@ void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& line
     if (currCol + 3 > charsPerLine)
         currLine++, currCol = 0;
 
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
-    InsertKey(currLine, currCol, charsPerLine, ' ', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);
+    InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);
 }
 
 void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool& wordWrap, bool& keepSelect)
@@ -332,7 +332,7 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
     case KEY_DELETE:
         DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
         break;
-    case KEY_F1:
+    /*case KEY_F1:
         Copy(selectBeginLine, selectBeginCol, currLine, currCol, lines, enterLines, copiedLines, enterLinesCopied, keepSelect);
         break;
     case KEY_F2:
@@ -346,7 +346,7 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
         break;
     case KEY_F5:
         Undo(currLine, currCol, lines, enterLines, stackLines, stackEnterLines, stackLinCol);
-        break;
+        break;*/
     }
 }
 
