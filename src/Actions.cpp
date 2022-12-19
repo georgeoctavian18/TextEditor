@@ -4,6 +4,8 @@
 
 void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap)
 {
+    char ch = '\0';
+
     stackLines.push(lines);
     stackEnterLines.push(enterLines);
     stackLinCol.push({ currLine, currCol });
@@ -15,7 +17,13 @@ void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currC
     }
     else if (selectBeginLine == currLine && selectBeginCol == currCol)
     {
-        BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+        if (currCol)
+            ch = lines[currLine][currCol - 1];
+
+        if (ch == '\t')
+            for(int i = 0 ; i <= 3; i++)
+                BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+        else BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
         return;
     }
 
@@ -39,7 +47,9 @@ void Insertion(int selectBeginLine, int selectBeginCol, int& currLine, int& curr
     while (currLine != selectBeginLine || currCol != selectBeginCol)
         BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
 
-    InsertKey(currLine, currCol, charsPerLine, ch, lines, enterLines, wordWrap);
+    if (ch == '\t')
+        TabKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+    else InsertKey(currLine, currCol, charsPerLine, ch, lines, enterLines, wordWrap);
 }
 
 void Copy(int selectBeginLine, int selectBeginCol, int currLine, int currCol, vector <string>& lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, bool& keepSelect)

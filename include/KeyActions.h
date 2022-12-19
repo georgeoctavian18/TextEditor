@@ -29,3 +29,5 @@ void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& curr
 void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines, bool wordWrap);
 
 void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap);
+
+void DateTimeKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap);

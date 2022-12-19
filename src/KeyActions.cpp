@@ -83,6 +83,18 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                 spacePos = lines[i].find_last_of(' ');
                 int j = lines[i].size() - 1;
 
+                if (lines[i][j] == '\t')
+                {
+                    for (int it = 0; it <= 3; it++)
+                    {
+                        CharToString(s, lines[i].back());
+                        lines[i].erase(lines[i].end() - 1);
+                        lines[i + 1].insert(0, s);
+                        j--;
+                    }
+                    continue;
+                }
+
                 if (spacePos + 1 >= charsPerLine || spacePos == -1)
                 {
                     CharToString(s, lines[i].back());
@@ -158,7 +170,6 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
 
             ok = true;
             currLine--;
-
         }
 
         int i = currLine;
@@ -285,7 +296,7 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
 
 void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
-    if (currCol + 3 > charsPerLine)
+    if (currCol + 3 > charsPerLine && wordWrap)
         currLine++, currCol = 0;
 
     InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);
@@ -332,36 +343,25 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
     case KEY_DELETE:
         DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
         break;
-    /*case KEY_F1:
-        Copy(selectBeginLine, selectBeginCol, currLine, currCol, lines, enterLines, copiedLines, enterLinesCopied, keepSelect);
-        break;
-    case KEY_F2:
-        Paste(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, copiedLines, enterLinesCopied, stackLines, stackEnterLines, stackLinCol, wordWrap);
-        break;
-    case KEY_F3:
-        Cut(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, copiedLines, enterLinesCopied, stackLines, stackEnterLines, stackLinCol, wordWrap, keepSelect);
-        break;
-    case KEY_F4:
-        SelectAll(selectBeginLine, selectBeginCol, currLine, currCol, lines, keepSelect);
-        break;
     case KEY_F5:
-        Undo(currLine, currCol, lines, enterLines, stackLines, stackEnterLines, stackLinCol);
-        break;*/
+        DateTimeKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap); 
+        break;
     }
 }
 
 void RightArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
 {
-    if (currCol == lines[currLine].size() || (currCol == lines[currLine].size() - 1 && !count(enterLines.begin(), enterLines.end(), currLine)))
+    if (currCol == lines[currLine].size() && lines.size() != currLine + 1)
     {
-        if (lines.size() != currLine + 1)
-        {
-            currCol = 0;
-            currLine++;
-        }
-        else if (currCol != lines[currLine].size()) currCol++;
+        currCol = 0;
+        currLine++;
     }
-    else if (currCol != lines[currLine].size()) currCol++;
+    else if (currCol != lines[currLine].size())
+    {
+        if (lines[currLine][currCol] == '\t')
+            currCol += 4;
+        else currCol++;
+    }
 }
 
 void LeftArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
@@ -373,11 +373,16 @@ void LeftArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string>
             currLine--;
             currCol = lines[currLine].size();
 
-            if (!count(enterLines.begin(), enterLines.end(), currLine) && lines[currLine][currCol - 1] != ' ')
-                currCol--;
+            //if (!count(enterLines.begin(), enterLines.end(), currLine) && lines[currLine][currCol - 1] != ' ' )
+              //  currCol--;
         }
     }
-    else currCol--;
+    else
+    {
+        if (lines[currLine][currCol - 1] == '\t')
+            currCol -= 4;
+        else currCol--;
+    }
 }
 
 void UpArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines, vector <int> enterLines)
@@ -386,6 +391,25 @@ void UpArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> l
     {
         currLine--;
         currCol = currCol < lines[currLine].size() ? currCol : lines[currLine].size();
+
+        if (lines[currLine][currCol] == '\t')
+        {
+            int j = currCol, nrRgt = 0, nrLft = 0;
+            while (j < lines[currLine].size() && lines[currLine][j] == '\t')
+                j++, nrRgt++;
+            
+
+            j = currCol - 1;
+            while (j >= 0 && lines[currLine][j] == '\t')
+                j--, nrLft++;
+
+            nrRgt = nrRgt - 4 * (nrRgt / 4);
+            nrLft = nrLft - 4 * (nrLft / 4);
+
+            if (nrRgt < nrLft)
+                currCol += nrRgt;
+            else currCol -= nrLft;
+        }
     }
 }
 
@@ -395,6 +419,25 @@ void DownArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string>
     {
         currLine++;
         currCol = currCol < lines[currLine].size() ? currCol : lines[currLine].size();
+
+        if (lines[currLine][currCol] == '\t')
+        {
+            int j = currCol, nrRgt = 0, nrLft = 0;
+            while (j < lines[currLine].size() && lines[currLine][j] == '\t')
+                j++, nrRgt++;
+
+
+            j = currCol - 1;
+            while (j >= 0 && lines[currLine][j] == '\t')
+                j--, nrLft++;
+
+            nrRgt = nrRgt - 4 * (nrRgt / 4);
+            nrLft = nrLft - 4 * (nrLft / 4);
+
+            if (nrRgt < nrLft)
+                currCol += nrRgt;
+            else currCol -= nrLft;
+        }
     }
 }
 
@@ -433,7 +476,20 @@ void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& curr
         RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
 
         if (last != currCol)
-            BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+            Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
     }
     else Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
+}
+
+void DateTimeKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
+{
+    char buffer[32];
+    time_t now = time(NULL);
+    tm* ptm = localtime(&now);
+    
+    // Format: Mo, 20:20 15/06/2009 
+    strftime(buffer, 32, "%a, %H:%M %d/%m/%Y", ptm);
+
+    for (int i = 0; i < strlen(buffer); i++)
+        InsertKey(currLine, currCol, charsPerLine, buffer[i], lines, enterLines, wordWrap);
 }

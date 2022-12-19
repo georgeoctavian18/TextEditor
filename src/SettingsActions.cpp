@@ -27,6 +27,18 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
             spacePos = lines[i].find_last_of(' ');
             int j = lines[i].size() - 1;
 
+            if (lines[i][j] == '\t')
+            {
+                for (int it = 0; it <= 3; it++)
+                {
+                    CharToString(s, lines[i].back());
+                    lines[i].erase(lines[i].end() - 1);
+                    lines[i + 1].insert(0, s);
+                    j--;
+                }
+                continue;
+            }
+
             if (spacePos + 1 >= charsPerLine || spacePos == -1)
             {
                 CharToString(s, lines[i].back());
