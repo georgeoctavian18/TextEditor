@@ -13,7 +13,7 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
     settextjustify(LEFT_TEXT, TOP_TEXT);
 
     int yTemp = posY;
-    
+
     if (selectBeginLine > selectEndLine || (selectBeginLine == selectEndLine && selectBeginCol > selectEndCol))
     {
         swap(selectBeginLine, selectEndLine);
@@ -46,7 +46,7 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
 
             xTemp += CHAR_DIST;
         }
-        
+
         yTemp += LINE_WIDTH;
     }
 

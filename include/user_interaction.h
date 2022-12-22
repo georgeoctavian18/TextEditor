@@ -217,8 +217,8 @@ void display(dropdown header[], int nr_header)
 struct slider{
     int state, maxState, minState, step;
     struct rectangle rect, mouseCatch;
-    bool selected, exists;
-    int yoffset;
+    bool selected, exists, active;
+    int offset;
     //button increase, decrease;
 };
 
@@ -229,13 +229,14 @@ void createSlider(slider &s, float x, float y, float w, float h, int minState, i
     s.step = step;
     s.state = defaultState;
     s.selected = false;
-    s.exists = false;
+    s.exists = true;
+    s.active = false;
 }
 
-void clickSlider(slider& s){
-    s.exists = (s.minState!=s.maxState);
+void clickVerticalSlider(slider& s){
+    s.active = (s.minState!=s.maxState);
 
-    if (s.exists)
+    if (s.exists && s.active)
     {
         struct vector2 v = {mousex(), mousey()};
         int total_states = (s.maxState-s.minState)/s.step;
@@ -250,18 +251,55 @@ void clickSlider(slider& s){
             if (isInsideRect(v, s.mouseCatch))
             {
                 s.selected = true;
-                s.yoffset = v.y - s.mouseCatch.y;
+                s.offset = v.y - s.mouseCatch.y;
             }
         if (isMouseUp)
             s.selected = false;
 
         if (s.selected){
-            if (v.y>=s.rect.y + s.rect.height - s.mouseCatch.height + s.yoffset)
+            if (v.y>=s.rect.y + s.rect.height - s.mouseCatch.height + s.offset)
                 s.state = s.maxState;
-            else if (v.y<=s.rect.y + s.yoffset)
+            else if (v.y<=s.rect.y + s.offset)
                 s.state = s.minState;
             else{
-                s.state = map(v.y-s.yoffset, s.rect.y, s.rect.y + s.rect.height - s.mouseCatch.height, s.minState, s.maxState);
+                s.state = map(v.y-s.offset, s.rect.y, s.rect.y + s.rect.height - s.mouseCatch.height, s.minState, s.maxState);
+                s.state = s.state-s.state%s.step;
+            }
+        }
+    }
+
+}
+
+void clickHorizontalSlider(slider& s){
+    s.active = (s.minState!=s.maxState);
+
+    if (s.exists && s.active)
+    {
+        struct vector2 v = {mousex(), mousey()};
+        int total_states = (s.maxState-s.minState)/s.step;
+        int total_empty_space = s.rect.height * total_states;
+
+        float width = max(s.rect.width - total_empty_space, s.rect.height*2);
+        float x = map(s.state, s.minState, s.maxState, s.rect.x, s.rect.x+s.rect.width - width);
+
+        s.mouseCatch = {x, s.rect.y, width, s.rect.height};
+
+        if (isMouseClicked)
+            if (isInsideRect(v, s.mouseCatch))
+            {
+                s.selected = true;
+                s.offset = v.x - s.mouseCatch.x;
+            }
+        if (isMouseUp)
+            s.selected = false;
+
+        if (s.selected){
+            if (v.x>=s.rect.x + s.rect.width - s.mouseCatch.width + s.offset)
+                s.state = s.maxState;
+            else if (v.x<=s.rect.x + s.offset)
+                s.state = s.minState;
+            else{
+                s.state = map(v.x-s.offset, s.rect.x, s.rect.x + s.rect.width - s.mouseCatch.width, s.minState, s.maxState);
                 s.state = s.state-s.state%s.step;
             }
         }
@@ -270,11 +308,15 @@ void clickSlider(slider& s){
 }
 
 void display(slider &s){
+
     if (s.exists)
     {
         int bgcol = COLOR(230, 230, 230);
-        int catchcol = COLOR(150, 150, 150);
         filledRect(s.rect.x, s.rect.y, s.rect.width, s.rect.height, bgcol, bgcol);
+    }
+    if (s.active)
+    {
+        int catchcol = COLOR(150, 150, 150);
         filledRect(s.mouseCatch.x, s.mouseCatch.y, s.mouseCatch.width, s.mouseCatch.height, catchcol, catchcol);
     }
 }

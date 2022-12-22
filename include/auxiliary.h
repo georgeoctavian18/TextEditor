@@ -69,6 +69,8 @@ void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& en
 
 void movePage(int CurrLine, int CurrCol, int &LineBeginFrame, int &ColBeginFrame, int &LineEndFrame, int &ColEndFrame, int RowsPerFrame, int CharsPerLine, vector <string>& Lines)
 {
+    if (!Lines.size()) return;
+
     if (CurrLine > LineEndFrame)
         LineBeginFrame = CurrLine - (RowsPerFrame - 1), LineEndFrame = CurrLine;
     else if (CurrLine < LineBeginFrame)
@@ -82,6 +84,9 @@ void movePage(int CurrLine, int CurrCol, int &LineBeginFrame, int &ColBeginFrame
             ColBeginFrame = 0, ColEndFrame = CharsPerLine;
         else ColBeginFrame = CurrCol, ColEndFrame--;
     }
+
+    if (LineEndFrame > Lines.size()-1 && LineBeginFrame>0)
+        LineEndFrame = Lines.size()-1, LineBeginFrame =  LineEndFrame - (RowsPerFrame - 1);
 }
 
 unsigned startTime, lastCursorChanged, lastMouseClicked;
