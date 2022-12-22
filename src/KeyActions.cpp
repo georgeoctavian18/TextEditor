@@ -35,18 +35,19 @@ void EnterKey(int& currLine, int& currCol, int charsPerLine, vector <string>& li
         for (int i = currCol; i < lines[currLine].size(); i++)
             InsertKey(line, col, charsPerLine, lines[currLine][i], lines, enterLines, wordWrap);
 
-        lines[currLine].erase(currCol);
+        if(currCol < lines[currLine].size())
+            lines[currLine].erase(currCol);
+        
         currLine++;
-
     }
-
+    InitLine(currLine, lines);
     currCol = 0;
 
 }
 
 void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
-    int spacePos;
+    int spacePos, tabPos, position = -1;
     bool isNextLine = false;
 
     string s;
@@ -77,10 +78,13 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                     if (enterLines[j] >= i)
                         enterLines[j]++;
             }
-
+            
             while (lines[i].size() > charsPerLine)
             {
+                position = -1;
                 spacePos = lines[i].find_last_of(' ');
+                tabPos = lines[i].find_last_of('\t');
+
                 int j = lines[i].size() - 1;
 
                 if (lines[i][j] == '\t')
@@ -95,7 +99,7 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                     continue;
                 }
 
-                if (spacePos + 1 >= charsPerLine || spacePos == -1)
+                if ((spacePos + 1 >= charsPerLine && tabPos + 1 >= charsPerLine) || (spacePos == -1 && tabPos == -1))
                 {
                     CharToString(s, lines[i].back());
                     lines[i].erase(lines[i].end() - 1);
@@ -103,8 +107,11 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                 }
                 else
                 {
+                    if (spacePos == -1 || spacePos + 1 >= charsPerLine) position = tabPos;
+                    else if (tabPos == -1 || tabPos + 1 >= charsPerLine) position = spacePos;
+                    else position = max(spacePos, tabPos);
 
-                    while (j > spacePos)
+                    while (j > position)
                     {
                         CharToString(s, lines[i].back());
                         lines[i].erase(lines[i].end() - 1);
@@ -117,9 +124,9 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
 
             if (i == currLine)
             {
-                if (currCol > spacePos && spacePos != -1)
+                if (currCol > position && position != -1)
                 {
-                    currCol -= spacePos;
+                    currCol -= position;
                     isNextLine = true;
                 }
                 else
@@ -146,13 +153,20 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
 
     if (wordWrap)
     {
+        bool tab = false;
         if (currCol)
         {
-            lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
+            if(lines[currLine][currCol - 1] == '\t')
+                lines[currLine].erase(lines[currLine].begin() + currCol - 4, lines[currLine].begin() + currCol),  tab = true;
+            else lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
 
             if (!lines[currLine].size() && currLine)
                 currCol = lines[--currLine].size();
-            else currCol--;
+            else
+            {
+                if (tab) currCol -= 4;
+                else currCol--;
+            }
         }
         else
         {
@@ -164,8 +178,12 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
             }
             else
             {
-                lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
-                currCol--;
+                if (lines[currLine - 1][currCol - 1] == '\t')
+                    lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 4, lines[currLine - 1].begin() + currCol), tab = true;
+                else lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
+
+                if (tab) currCol -= 4;
+                else currCol--;
             }
 
             ok = true;
@@ -205,12 +223,12 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
 
                 while (emptySpace >= j && lines[i + 1].size())
                 {
-
-                    while (lines[i + 1][j] != ' ' && j < lines[i + 1].size())
-                        j++;
-
                     if (lines[i + 1][j] == ' ' && !j)
                         j = 1;
+                    else if (lines[i + 1][j] == '\t' && !j)
+                        j = 4;
+                    else while (lines[i + 1][j] != ' ' && j < lines[i + 1].size())
+                        j++;
 
                     if (j <= emptySpace)
                     {
@@ -219,11 +237,33 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
                         lines[i] += s;
                         j = 0;
                     }
-                    else if (lines[i].back() != ' ' && lines[i + 1].front() != ' ' && emptySpace >= 0)
+                    else if (lines[i].back() != ' ' && lines[i].back() != '\t' && lines[i + 1].front() != ' ' && lines[i + 1].front() != '\t' )
                     {
-                        string s = lines[i + 1].substr(0, emptySpace);
-                        lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + emptySpace);
-                        lines[i] += s;
+                        int wordStart = lines[i].size() - 1;
+
+                        while (wordStart >= 0 && lines[i][wordStart] != ' ' && lines[i][wordStart] != '\t')
+                            wordStart--;
+
+                        if (wordStart < 0 && emptySpace >= 0)
+                        {
+                            string s = lines[i + 1].substr(0, emptySpace);
+                            lines[i + 1].erase(lines[i + 1].begin(), lines[i + 1].begin() + emptySpace);
+                            lines[i] += s;
+                        }
+                        else if (wordStart >= 0)
+                        {
+                            int line = i + 1, col = 0;
+                                
+                            for(int p = wordStart + 1; p < lines[i].size(); p++)
+                                InsertKey(line, col, charsPerLine, lines[i][p], lines, enterLines, wordWrap);
+
+                            currLine = i + 1;
+                            currCol = lines[i].size() - wordStart - 1;
+
+                            lines[i].erase(lines[i].begin() + wordStart, lines[i].end());
+                            
+                        }
+                        
                     }
                     emptySpace = charsPerLine - lines[i].size();
                 }
@@ -296,7 +336,7 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
 
 void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
 {
-    if (currCol + 3 > charsPerLine && wordWrap)
+    if (currCol + 4 > charsPerLine && wordWrap)
         currLine++, currCol = 0;
 
     InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);

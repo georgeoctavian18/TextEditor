@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include "Initialization.h"
 #include "auxiliary.h"
@@ -21,13 +22,14 @@ int main()
 
     createHeader(header, nr_header);
 
-    slider lineSlider;
+    slider lineSlider, colSlider;
     struct rectangle headerBox = header[0].rect;
     headerBox.width = WIDTH;
     struct rectangle statusBarBox = {0, HEIGHT - 30, WIDTH, 30};
-    createSlider(lineSlider, WIDTH-30, headerBox.y + headerBox.height, 30, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height), 0, 0, 0, 1);
-    struct rectangle textBox = { 0, (headerBox.y + headerBox.height), WIDTH - lineSlider.rect.width, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height) };
-
+    createSlider(lineSlider, WIDTH-25, headerBox.y + headerBox.height, 25, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height), 0, 0, 0, 1);
+    createSlider(colSlider, 0, HEIGHT - statusBarBox.height - lineSlider.rect.width, WIDTH - lineSlider.rect.width, lineSlider.rect.width, 0, 0, 0, 1);
+    lineSlider.rect.height -= colSlider.rect.height;
+    struct rectangle textBox = { 0, (headerBox.y + headerBox.height), WIDTH - lineSlider.rect.width, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height + colSlider.rect.height) };
 
     vector <string> Lines, CopiedLines;
     vector <int> EnterLines, EnterLinesCopied;
@@ -67,7 +69,7 @@ int main()
         {
             KeepSelect = false;
             Ch = getch();
-            cout<<(int)Ch<<endl;
+            //cout<<(int)Ch<<endl;
             switch (Ch)
             {
             case ESC:
@@ -80,9 +82,6 @@ int main()
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
-            /*case TAB:
-               TabKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
-                break;*/
             case BS:
                 Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
                 break;
@@ -116,21 +115,6 @@ int main()
                 SelectBeginCol = CurrCol;
             }
         }
-        /*
-        if (CurrLine > LineEndFrame)
-            LineBeginFrame++, LineEndFrame++;
-        else if (CurrLine < LineBeginFrame)
-            LineBeginFrame--, LineEndFrame--;
-
-        if (CurrCol > ColEndFrame)
-            ColBeginFrame++, ColEndFrame++;
-        else if (CurrCol < ColBeginFrame)
-        {
-            if (CurrCol == Lines[CurrLine].size())
-                ColBeginFrame = 0, ColEndFrame = CharsPerLine;
-            else ColBeginFrame--, ColEndFrame--;
-        }*/
-        
 
         clickedOnHeader=false;
         if (header[0].isSelected)
@@ -141,17 +125,19 @@ int main()
         if (header[1].isSelected)
         {
             if(isClicked(header[1].options[0]))
-                clickedOnHeader=true, Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol);
+                clickedOnHeader=true, Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[1]))
-                clickedOnHeader=true, Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect);
+                clickedOnHeader=true, Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[2]))
                 clickedOnHeader=true, Copy(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, EnterLines, CopiedLines, EnterLinesCopied, KeepSelect);
             if(isClicked(header[1].options[3]))
-                clickedOnHeader=true, Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap);
+                clickedOnHeader=true, Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[4]))
-                clickedOnHeader=true, Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
+                clickedOnHeader=true, Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[10]))
                 clickedOnHeader=true, SelectAll(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, KeepSelect);
+            if (isClicked(header[1].options[11]))
+                clickedOnHeader = true; //DateTimeKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
         }
 
         if (header[2].isSelected && isClicked(header[2].options[0]))
@@ -173,6 +159,12 @@ int main()
             }
             else
                 UndoWordWrap(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
+
+            colSlider.exists = !WordWrap;
+            lineSlider.rect.height += (colSlider.exists?-1:1)*colSlider.rect.height;
+            textBox.height += (colSlider.exists?-1:1)*colSlider.rect.height;
+
+
             lastCursorChanged = millis();
             movePage(CurrLine, CurrCol, LineBeginFrame, ColBeginFrame, LineEndFrame, ColEndFrame, RowsPerFrame, CharsPerLine, Lines);
             SelectBeginLine = CurrLine;
@@ -186,9 +178,20 @@ int main()
 
         lineSlider.maxState = max(0, (int)Lines.size()-RowsPerFrame);
         lineSlider.state = LineBeginFrame;
-        clickSlider(lineSlider);
+        clickVerticalSlider(lineSlider);
         LineBeginFrame = lineSlider.state;
         LineEndFrame = LineBeginFrame + (RowsPerFrame - 1);
+
+        int maxi = 0;
+        for (int i=0; i<Lines.size(); i++)
+            if (Lines[i].size()>maxi)
+                maxi = Lines[i].size();
+
+        colSlider.maxState = max(0, maxi-CharsPerLine);
+        colSlider.state = ColBeginFrame;
+        clickHorizontalSlider(colSlider);
+        ColBeginFrame = colSlider.state;
+        ColEndFrame = ColBeginFrame + CharsPerLine;
 
         //AFTERUPDATE
         clearFlags();
@@ -209,7 +212,7 @@ int main()
             if (WordWrap)
             {
                 struct rectangle cb = header[2].options[0].rect;
-                int col = header[2].options[0].hovering_col;
+                int col = header[2].options[0].default_col;
                 int lat = cb.height*0.5;
                 struct rectangle tick = {cb.x + cb.width + cb.height/2 - lat/2, cb.y + cb.height/2 - lat/2, lat, lat};
                 filledRect(tick.x, tick.y, tick.width, tick.height, col, col);
@@ -218,7 +221,14 @@ int main()
                 line(tick.x, tick.y+tick.height, tick.x+tick.width, tick.y);
             }
 
+
         display(lineSlider);
+        display(colSlider);
+        if (!WordWrap)
+        {
+            int bgcol = COLOR(230, 230, 230);
+            filledRect(lineSlider.rect.x, lineSlider.rect.y+lineSlider.rect.height, lineSlider.rect.width-1, statusBarBox.y, bgcol, BLACK);
+        }
         statusBar(CurrLine, CurrCol, Lines, EnterLines, statusBarBox);
         //filledCircle(mousex(), mousey(), 5, (isMouseClicked ? COLOR(0, 255, 0) : COLOR(255, 0, 0)), COLOR(0, 255, 0));
 
