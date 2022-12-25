@@ -2,10 +2,11 @@
 
 
 
-void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap)
+void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool& isSaved)
 {
-    //char ch = '\0';
+    if (!currLine && !currCol && !selectBeginLine && !selectBeginCol) return;
 
+    isSaved = false;
     stackLines.push(lines);
     stackEnterLines.push(enterLines);
     stackLinCol.push({ currLine, currCol });
@@ -17,23 +18,17 @@ void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currC
     }
     else if (selectBeginLine == currLine && selectBeginCol == currCol)
     {
-        //if (currCol)
-            //ch = lines[currLine][currCol - 1];
-
-        /*if (ch == '\t')
-            for(int i = 0 ; i <= 3; i++)
-                BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);*/
         BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
         return;
     }
 
     while (currLine != selectBeginLine || currCol != selectBeginCol)
         BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
-
 }
 
-void Insertion(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap)
+void Insertion(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, char ch, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool& isSaved)
 {
+    isSaved = false;
     stackLines.push(lines);
     stackEnterLines.push(enterLines);
     stackLinCol.push({ currLine, currCol });
@@ -54,6 +49,8 @@ void Insertion(int selectBeginLine, int selectBeginCol, int& currLine, int& curr
 
 void Copy(int selectBeginLine, int selectBeginCol, int currLine, int currCol, vector <string>& lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, bool& keepSelect)
 {
+    if (currLine == selectBeginLine && currCol == selectBeginCol) return;
+
     copiedLines.clear();
     enterLinesCopied.clear();
 
@@ -95,8 +92,9 @@ void Copy(int selectBeginLine, int selectBeginCol, int currLine, int currCol, ve
     }
 }
 
-void Paste(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap)
+void Paste(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool& isSaved)
 {
+    isSaved = false;
     stackLines.push(lines);
     stackEnterLines.push(enterLines);
     stackLinCol.push({ currLine, currCol });
@@ -109,7 +107,7 @@ void Paste(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol,
 
     if (selectBeginLine != currLine || selectBeginCol != currCol)
     {
-        Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
+        Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap, isSaved);
         stackLines.pop(); stackEnterLines.pop(); stackLinCol.pop();
     }
 
@@ -123,12 +121,12 @@ void Paste(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol,
     }
 }
 
-void Cut(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool keepSelect)
+void Cut(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool keepSelect, bool& isSaved)
 {
     if (selectBeginLine != currLine || selectBeginCol != currCol)
     {
         Copy(selectBeginLine, selectBeginCol, currLine, currCol, lines, enterLines, copiedLines, enterLinesCopied, keepSelect);
-        Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
+        Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap, isSaved);
     }
 }
 
@@ -143,10 +141,11 @@ void SelectAll(int& selectBeginLine, int& selectBeginCol, int& currLine, int& cu
     }
 }
 
-void Undo(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol)
+void Undo(int& currLine, int& currCol, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool& isSaved)
 {
     if (!stackLines.empty())
     {
+        isSaved = false;
         lines = stackLines.top();
         stackLines.pop();
         enterLines = stackEnterLines.top();

@@ -25,9 +25,9 @@ void InitLine(int currLine, vector <string>& lines)
 void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& rowsPerFrame, int& a, int& b, int& c, int& d)
 {
     currLine = 0, currCol = 0;
-    posX = CHAR_DIST, posY = windSizeY / 10;
+    posX = CHAR_WIDTH, posY = windSizeY / 10;
     rowsPerFrame = (windSizeY - 2 * posY) / CHAR_HEIGHT;
-    charsPerLine = (windSizeX - 4 * posX) / CHAR_DIST;
+    charsPerLine = (windSizeX - 4 * posX) / CHAR_WIDTH;
     a = posX, b = posY, c = posX, d = posY + CHAR_HEIGHT;
 }
 

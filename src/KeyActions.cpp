@@ -99,7 +99,7 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                     continue;
                 }
 
-                if ((spacePos + 1 >= charsPerLine && tabPos + 1 >= charsPerLine) || (spacePos == -1 && tabPos == -1))
+                if ((spacePos == -1 || spacePos == charsPerLine) && (tabPos == charsPerLine || tabPos == -1))
                 {
                     CharToString(s, lines[i].back());
                     lines[i].erase(lines[i].end() - 1);
@@ -107,8 +107,8 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                 }
                 else
                 {
-                    if (spacePos == -1 || spacePos + 1 >= charsPerLine) position = tabPos;
-                    else if (tabPos == -1 || tabPos + 1 >= charsPerLine) position = spacePos;
+                    if (spacePos == -1 || spacePos == charsPerLine) position = tabPos;
+                    else if (tabPos == -1 || tabPos == charsPerLine) position = spacePos;
                     else position = max(spacePos, tabPos);
 
                     while (j > position)
@@ -118,7 +118,6 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                         lines[i + 1].insert(0, s);
                         j--;
                     }
-
                 }
             }
 
@@ -283,10 +282,15 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
     }
     else
     {
+        bool tab = false;
         if (currCol)
         {
-            lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
-            currCol--;
+            if (lines[currLine][currCol - 1] == '\t')
+                lines[currLine].erase(lines[currLine].begin() + currCol - 4, lines[currLine].begin() + currCol), tab = true;
+            else lines[currLine].erase(lines[currLine].begin() + currCol - 1, lines[currLine].begin() + currCol);
+
+            if (tab) currCol -= 4;
+            else currCol--;
         }
         else
         {
@@ -297,8 +301,12 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
             }
             else
             {
-                lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
-                currCol--;
+                if (lines[currLine - 1][currCol - 1] == '\t')
+                    lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 4, lines[currLine - 1].begin() + currCol), tab = true;
+                else lines[currLine - 1].erase(lines[currLine - 1].begin() + currCol - 1, lines[currLine - 1].begin() + currCol);
+
+                if (tab) currCol -= 4;
+                else currCol--;
             }
 
             ok = true;
@@ -345,7 +353,7 @@ void TabKey(int& currLine, int& currCol, int charsPerLine, vector <string>& line
     InsertKey(currLine, currCol, charsPerLine, '\t', lines, enterLines, wordWrap);
 }
 
-void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool& wordWrap, bool& keepSelect)
+void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& currCol, int command, int charsPerLine, vector <string> &lines, vector <int>& enterLines, vector <string>& copiedLines, vector <int>& enterLinesCopied, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool& wordWrap, bool& keepSelect, bool& isSaved, int& font)
 {
     int selectEndLine = currLine, selectEndCol = currCol;
 
@@ -381,10 +389,19 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
         EndKey(currLine, currCol, charsPerLine, lines, enterLines);
         break;
     case KEY_DELETE:
-        DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
+        DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap, isSaved);
         break;
     case KEY_F5:
-        DateTimeKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap); 
+        DateTimeKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap, isSaved); 
+        break;
+    case KEY_F1:
+        font = DEFAULT_FONT;
+        break;
+    case KEY_F2:
+        font = BOLD_FONT;
+        break;
+    case KEY_F3:
+        font = COMPLEX_FONT;
         break;
     }
 }
@@ -503,7 +520,7 @@ void EndKey(int& currLine, int& currCol, int charsPerLine, vector <string> lines
     }
 }
 
-void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap)
+void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, stack <vector<string>>& stackLines, stack <vector<int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool& isSaved)
 {
     if (selectBeginLine == currLine && selectBeginCol == currCol)
     {
@@ -516,17 +533,17 @@ void DeleteKey(int selectBeginLine, int selectBeginCol, int& currLine, int& curr
         RightArrowKey(currLine, currCol, charsPerLine, lines, enterLines);
 
         if (last != currCol)
-            Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
+            Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap, isSaved);
     }
-    else Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap);
+    else Deletion(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap, isSaved);
 }
 
-void DateTimeKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap)
+void DateTimeKey(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
 {
     char buffer[32];
     time_t now = time(NULL);
     tm* ptm = localtime(&now);
-    
+    isSaved = true;
     // Format: Mo, 20:20 15/06/2009 
     strftime(buffer, 32, "%a, %H:%M %d/%m/%Y", ptm);
 

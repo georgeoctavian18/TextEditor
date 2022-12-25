@@ -45,26 +45,30 @@ void filledRect(float x, float y, float w, float h, int fillColor, int borderCol
     rectangle(x, y, x + w, y + h);
 }
 
-void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines, struct rectangle box)
+void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines, char fileName[], struct rectangle box, bool isSaved)
 {
-    filledRect(box.x, box.y, box.width-1, box.height-1, COLOR(255, 255, 255), COLOR(0, 0, 0));
+    filledRect(box.x, box.y, box.width - 1, box.height - 1, COLOR(255, 255, 255), COLOR(0, 0, 0));
     int i, lin, col, maxi;
     lin = 0;
     maxi = -1;
-    for (i=0; i<(int)enterLines.size(); i++)
-        if (enterLines[i]<CurrLine)
+    for (i = 0; i < (int)enterLines.size(); i++)
+        if (enterLines[i] < CurrLine)
         {
             lin++;
-            if (enterLines[i]>maxi)
+            if (enterLines[i] > maxi)
                 maxi = enterLines[i];
         }
-    col=0;
-    for (i=maxi+1; i<CurrLine; i++)
-        col+=lines[i].size();
-    col+=CurrCol;
-    bgiout << "Lin " << lin + 1 << ", Col " << col + 1;
+    col = 0;
+    for (i = maxi + 1; i < CurrLine; i++)
+        col += lines[i].size();
+    col += CurrCol;
+
+    string fileName2 = fileName;
+    if (!isSaved) fileName2 += "*";
+
+    bgiout << "Lin " << lin + 1 << ", Col " << col + 1 << "   " << fileName2;
     setbkcolor(WHITE);
-    outstreamxy(10, box.y+1);
+    outstreamxy(10, box.y + 1);
 }
 
 void movePage(int CurrLine, int CurrCol, int &LineBeginFrame, int &ColBeginFrame, int &LineEndFrame, int &ColEndFrame, int RowsPerFrame, int CharsPerLine, vector <string>& Lines)

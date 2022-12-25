@@ -6,6 +6,7 @@
 #include "Print.h"
 #include "user_interaction.h"
 #include "loading.h"
+#include "FileExplorer.h"
 
 
 int main()
@@ -38,7 +39,7 @@ int main()
     stack <pair<int, int>> StackLinCol;
     char Ch;
     int CurrLine, CurrCol, SelectBeginLine, SelectBeginCol;
-    int PosX, PosY, CharsPerLine, RowsPerFrame, Command;
+    int PosX, PosY, CharsPerLine, RowsPerFrame, Command, Font = COMPLEX_FONT;
     int a, b, c, d;
 
     Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, RowsPerFrame, a, b, c, d);
@@ -49,11 +50,11 @@ int main()
     int LineBeginFrame = 0, LineEndFrame = RowsPerFrame - 1;
     int ColBeginFrame = 0, ColEndFrame = CharsPerLine;
 
-    bool WordWrap = false;
+    bool WordWrap = false, isSaved = true;
     bool KeepSelect;
 
+    char Path[1024] = "\0", FileName[256]="Untitled";
 
-    //InitLine(CurrLine, Lines);
 
     while (!windowShouldClose)
     {
@@ -77,35 +78,41 @@ int main()
                 break;
             case 0:
                 Command = getch();
-                SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect);
+                SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
                 break;
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
                 break;
             case BS:
-                Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
+                Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
                 break;
             case CTRLX:
-                Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect);
+                Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved);
                 break;
             case CTRLC:
                 Copy(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, EnterLines, CopiedLines, EnterLinesCopied, KeepSelect);
                 break;
             case CTRLV:
-                Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap);
+                Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
                 break;
             case CTRLZ:
-                Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol);
+                Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, isSaved);
                 break;
             case CTRLA:
                 SelectAll(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, KeepSelect);
                 break;
+            case CTRLS:
+                SaveFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved);
+                break;
+            case CTRLN:
+                NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved);
+                break;
            default:
-               Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap);
+               Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
             }
 
-            a = c = PosX + CurrCol * CHAR_DIST;
-            b = PosY + CurrLine * LINE_WIDTH, d = PosY + (CurrLine + 1) * LINE_WIDTH;
+            a = c = PosX + CurrCol * CHAR_WIDTH;
+            b = PosY + CurrLine * CHAR_HEIGHT, d = PosY + (CurrLine + 1) * CHAR_HEIGHT;
 
             lastCursorChanged=millis();
             movePage(CurrLine, CurrCol, LineBeginFrame, ColBeginFrame, LineEndFrame, ColEndFrame, RowsPerFrame, CharsPerLine, Lines);
@@ -119,25 +126,33 @@ int main()
         clickedOnHeader=false;
         if (header[0].isSelected)
         {
+            if (isClicked(header[0].options[0]))
+                clickedOnHeader = true, NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            if (isClicked(header[0].options[1]))
+                clickedOnHeader = true, OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            if (isClicked(header[0].options[2]))
+                clickedOnHeader = true, SaveFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            if (isClicked(header[0].options[3]))
+                clickedOnHeader = true, SaveAsFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[0].options[4]))
                 windowShouldClose = true;
         }
         if (header[1].isSelected)
         {
             if(isClicked(header[1].options[0]))
-                clickedOnHeader=true, Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader=true, Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[1]))
-                clickedOnHeader=true, Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader=true, Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[2]))
                 clickedOnHeader=true, Copy(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, EnterLines, CopiedLines, EnterLinesCopied, KeepSelect);
             if(isClicked(header[1].options[3]))
-                clickedOnHeader=true, Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader=true, Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[4]))
-                clickedOnHeader=true, Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader=true, Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if(isClicked(header[1].options[10]))
                 clickedOnHeader=true, SelectAll(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, KeepSelect);
             if (isClicked(header[1].options[11]))
-                clickedOnHeader = true; //DateTimeKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader = true, DateTimeKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
         }
 
         if (header[2].isSelected && isClicked(header[2].options[0]))
@@ -199,12 +214,13 @@ int main()
         //FRAME
         background(WHITE);
 
-        PrintText(PosX, PosY, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines);
+        PrintText(PosX, PosY, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Font, Lines);
+        settextstyle(COMPLEX_FONT, HORIZ_DIR, 2);
 
         if (LineBeginFrame <= CurrLine && CurrLine <= LineEndFrame && ColBeginFrame <= CurrCol && CurrCol <= ColEndFrame)
             if ((millis() - lastCursorChanged) / 500 % 2 == 0 || (millis() - lastCursorChanged) / 1000 > 5)
-                PrintCursor(PosX + (CurrCol - ColBeginFrame) * CHAR_DIST, PosY + (CurrLine - LineBeginFrame) * LINE_WIDTH,
-                            PosX + (CurrCol - ColBeginFrame) * CHAR_DIST, PosY + (CurrLine - LineBeginFrame + 1) * LINE_WIDTH, BLACK);
+                PrintCursor(PosX + (CurrCol - ColBeginFrame) * CHAR_WIDTH, PosY + (CurrLine - LineBeginFrame) * CHAR_HEIGHT,
+                            PosX + (CurrCol - ColBeginFrame) * CHAR_WIDTH, PosY + (CurrLine - LineBeginFrame + 1) * CHAR_HEIGHT, BLACK);
 
         display(header, nr_header);
 
@@ -229,7 +245,8 @@ int main()
             int bgcol = COLOR(230, 230, 230);
             filledRect(lineSlider.rect.x, lineSlider.rect.y+lineSlider.rect.height, lineSlider.rect.width-1, statusBarBox.y, bgcol, BLACK);
         }
-        statusBar(CurrLine, CurrCol, Lines, EnterLines, statusBarBox);
+
+        statusBar(CurrLine, CurrCol, Lines, EnterLines, FileName, statusBarBox, isSaved);
         //filledCircle(mousex(), mousey(), 5, (isMouseClicked ? COLOR(0, 255, 0) : COLOR(255, 0, 0)), COLOR(0, 255, 0));
 
         //AFTERFRAME

@@ -12,11 +12,11 @@
 #include <ctime>
 #include <chrono>
 #include <fstream>
+#include <windows.h>
 
 using namespace std;
 
-#define CHAR_DIST 14
-#define LINE_WIDTH 20
+
 #define CHAR_WIDTH 14
 #define CHAR_HEIGHT 20
 #define CR 13
@@ -28,8 +28,12 @@ using namespace std;
 #define CTRLV 'V'-'A'+1
 #define CTRLA 'A'-'A'+1
 #define CTRLZ 'Z'-'A'+1
+#define CTRLS 'S'-'A'+1
+#define CTRLN 'N'-'A'+1
 #define windSizeX 800
 #define windSizeY 600
+
+
 
 
 void setOptions();

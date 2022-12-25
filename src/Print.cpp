@@ -6,11 +6,12 @@ void PrintCursor(int x1, int y1, int x2, int y2, int color)
     line(x1, y1, x2, y2);
 }
 
-void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int colBeginFrame, int colEndFrame, int selectBeginLine, int selectBeginCol, int selectEndLine, int selectEndCol, vector <string> lines)
+void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int colBeginFrame, int colEndFrame, int selectBeginLine, int selectBeginCol, int selectEndLine, int selectEndCol, int font, vector <string> lines)
 {
     setcolor(BLACK);
     setbkcolor(WHITE);
     settextjustify(LEFT_TEXT, TOP_TEXT);
+    settextstyle(font, HORIZ_DIR, 2);
 
     int yTemp = posY;
 
@@ -44,10 +45,10 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
 
             outtextxy(xTemp, yTemp, PrintArray);
 
-            xTemp += CHAR_DIST;
+            xTemp += CHAR_WIDTH;
         }
 
-        yTemp += LINE_WIDTH;
+        yTemp += CHAR_HEIGHT;
     }
 
 }
