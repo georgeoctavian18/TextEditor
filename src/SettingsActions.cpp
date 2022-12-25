@@ -88,3 +88,78 @@ void UndoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>
     for (int i = 0; i <= pos; i++)
         enterLines.push_back(i);
 }
+
+void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap)
+{
+    char line[1000];
+
+    if (!getOpenPath(path))
+        strcpy(path, "\0");
+
+    getNameFromPath(path, fileName);
+
+    ifstream fin(path);
+
+    while (fin.getline(line, 1000))
+    {
+        for (int i = 0; i < strlen(line); i++)
+            InsertKey(currLine, currCol, charsPerLine, line[i], lines, enterLines, wordWrap);
+        EnterKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+    }
+    fin.close();
+    currLine = currCol = 0;
+}
+
+void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
+{
+    if (!getSavePath(path))
+        strcpy(path, "\0");
+
+    getNameFromPath(path, fileName);
+    isSaved = true;
+
+    ofstream fout(path);
+    for (int i = 0; i < lines.size(); i++)
+    {
+        fout << lines[i];
+        if(count(enterLines.begin(), enterLines.end(), i))
+            fout << '\n';
+
+    }
+    fout.close();
+}
+
+void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
+{
+    if (!getSavePath(path))
+        strcpy(path, "\0");
+
+    getNameFromPath(path, fileName);
+    isSaved = true;
+
+    ofstream fout(path);
+    fout << "";
+    fout.close();
+
+    currLine = currCol = 0;
+    lines.clear();
+    enterLines.clear();
+}
+
+void SaveFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
+{
+    if (!strcmp(fileName, "Untitled"))
+    {
+        SaveAsFile(currLine, currCol, charsPerLine, path, fileName, lines, enterLines, wordWrap, isSaved);
+        return;
+    }
+    isSaved = true;
+    ofstream fout(path);
+    for (int i = 0; i < lines.size(); i++)
+    {
+        fout << lines[i];
+        if (count(enterLines.begin(), enterLines.end(), i))
+            fout << '\n';
+    }
+    fout.close();
+}
