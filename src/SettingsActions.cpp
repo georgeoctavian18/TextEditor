@@ -89,9 +89,14 @@ void UndoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>
         enterLines.push_back(i);
 }
 
-void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap)
+void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
 {
     char line[1000];
+
+    isSaved = true;
+    lines.clear();
+    enterLines.clear();
+    currLine = currCol = 0;
 
     if (!getOpenPath(path))
         strcpy(path, "\0");
@@ -107,7 +112,7 @@ void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
         EnterKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
     }
     fin.close();
-    currLine = currCol = 0;
+    
 }
 
 void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
@@ -124,7 +129,6 @@ void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char
         fout << lines[i];
         if(count(enterLines.begin(), enterLines.end(), i))
             fout << '\n';
-
     }
     fout.close();
 }
@@ -162,4 +166,97 @@ void SaveFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
             fout << '\n';
     }
     fout.close();
+}
+
+void SelectWindowSize(int& windSizeX, int& windSizeY)
+{
+    bool close = false, box = false;
+    int x = 125, y = 45;
+    char ch = '\0', p[3] = {'X', ':', '\0'};
+    initwindow(300, 150, "Text Editor", (getmaxwidth() - 300) / 2, (getmaxheight() - 150) / 2);
+    setcolor(0);
+    setbkcolor(15);
+    bar(0, 0, 300, 150);
+    
+    outtextxy(80, 45, p);
+    p[0] = 'Y';
+    outtextxy(80, 95, p);
+
+    
+    setfillstyle(SOLID_FILL, 7);
+    bar(115, 40, 185, 70);
+    bar(115, 90, 185, 120);
+
+    settextstyle(8, HORIZ_DIR, 2);
+    setfillstyle(SOLID_FILL, 15);
+
+    char text[50] = "Select the dimensions:", printArray[50];
+    string stText, ndText;
+
+    outtextxy(10, 10, text);
+
+    setbkcolor(7);
+    
+    while (!close)
+    {
+        if (kbhit())
+        {
+            ch = getch();
+            if (ch == CR)
+                close = true;
+            else if (ch == 0)
+            {
+                ch = getch();
+                if (ch == KEY_DOWN && !box)
+                    box = true;
+                else if (ch == KEY_UP && box)
+                    box = false;
+            }
+            else
+            {
+                if (!box)
+                {
+                    if (ch >= '0' && ch <= '9' && stText.size() < 4)
+                        stText += ch;
+                    else if (ch == BS && !stText.empty())
+                    {
+                        stText.pop_back();
+                        setfillstyle(SOLID_FILL, 7);
+                        bar(115, 40, 185, 70);
+                        bar(115, 90, 185, 120);
+                        setfillstyle(SOLID_FILL, 15);
+                    }
+                }
+                else
+                {
+                    if (ch >= '0' && ch <= '9' && ndText.size() < 4)
+                        ndText += ch;
+                    else if (ch == BS && !ndText.empty())
+                    {
+                        ndText.pop_back();
+                        setfillstyle(SOLID_FILL, 7);
+                        bar(115, 40, 185, 70);
+                        bar(115, 90, 185, 120);
+                        setfillstyle(SOLID_FILL, 15);
+                    }
+                }
+            }
+        }
+        
+        string copySt = stText;
+        StringToArray(copySt, printArray);
+        outtextxy(x, y, printArray);
+
+        string copyNd = ndText;
+        StringToArray(copyNd, printArray);
+        outtextxy(x, y + 50, printArray);
+        
+        //swapbuffers();
+    }
+
+    std::string::size_type sz;
+    windSizeX = stoi(stText, &sz);
+    windSizeY = stoi(ndText, &sz);
+    
+    closegraph();
 }

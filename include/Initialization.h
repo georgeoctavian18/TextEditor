@@ -30,13 +30,11 @@ using namespace std;
 #define CTRLZ 'Z'-'A'+1
 #define CTRLS 'S'-'A'+1
 #define CTRLN 'N'-'A'+1
-#define windSizeX 800
-#define windSizeY 600
 
 
 
 
-void setOptions();
+void setOptions(int windSizeX, int windSizeY);
 
 void StringToArray(string& s, char arr[]);
 
@@ -44,4 +42,4 @@ void CharToString(string& s, char c);
 
 void InitLine(int currLine, vector <string>& lines);
 
-void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& rowsPerFrame, int& a, int& b, int& c, int& d);
+void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& rowsPerFrame, int& a, int& b, int& c, int& d, int windSizeX, int windSizeY);

@@ -195,7 +195,7 @@ void clickDropdown(dropdown header[], int nr_header)
 void display(dropdown& header) {
     setfillstyle(SOLID_FILL, header.col);
     bar(header.rect.x, header.rect.y, header.rect.x + header.rect.width, header.rect.y + header.rect.height);
-
+    //settextstyle(COMPLEX_FONT, HORIZ_DIR, 2);
     setcolor(BLACK);
     setbkcolor(header.col);
     settextjustify(LEFT_TEXT, TOP_TEXT);
