@@ -11,7 +11,7 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
     setcolor(BLACK);
     setbkcolor(WHITE);
     settextjustify(LEFT_TEXT, TOP_TEXT);
-    settextstyle(font, HORIZ_DIR, 2);
+    
 
     int yTemp = posY;
 

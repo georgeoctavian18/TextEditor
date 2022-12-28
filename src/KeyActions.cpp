@@ -395,13 +395,13 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
         DateTimeKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap, isSaved); 
         break;
     case KEY_F1:
-        font = DEFAULT_FONT;
+        settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
         break;
     case KEY_F2:
-        font = BOLD_FONT;
+        settextstyle(BOLD_FONT, HORIZ_DIR, 2);
         break;
     case KEY_F3:
-        font = COMPLEX_FONT;
+        settextstyle(COMPLEX_FONT, HORIZ_DIR, 2);
         break;
     }
 }

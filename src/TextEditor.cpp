@@ -11,10 +11,12 @@
 
 int main()
 {
-    //cin>>windSizeX>>windSizeY;
+    int WindSizeX, WindSizeY;
+
+    SelectWindowSize(WindSizeX, WindSizeY);
 
     //SETUP
-    setOptions();
+    setOptions(WindSizeX, WindSizeY);
     setupFlags();
 
     dropdown header[5];
@@ -42,7 +44,7 @@ int main()
     int PosX, PosY, CharsPerLine, RowsPerFrame, Command, Font = COMPLEX_FONT;
     int a, b, c, d;
 
-    Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, RowsPerFrame, a, b, c, d);
+    Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, RowsPerFrame, a, b, c, d, WindSizeX, WindSizeY);
 
     SelectBeginLine = CurrLine;
     SelectBeginCol = CurrCol;
@@ -78,7 +80,32 @@ int main()
                 break;
             case 0:
                 Command = getch();
-                SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
+                if (Command == KEY_F4)
+                {
+                    SelectWindowSize(WindSizeX, WindSizeY);
+                    setOptions(WindSizeX, WindSizeY);
+                    setupFlags();
+                    CurrLine = 0, CurrCol = 0;
+                    PosY = WindSizeY / 10;
+                    RowsPerFrame = (WindSizeY - 2 * PosY) / CHAR_HEIGHT;
+                    CharsPerLine = (WindSizeX - 4 * PosX) / CHAR_WIDTH;
+                    LineBeginFrame = 0, LineEndFrame = RowsPerFrame - 1;
+                    ColBeginFrame = 0, ColEndFrame = CharsPerLine;
+
+                    createHeader(header, nr_header);
+
+                    headerBox = header[0].rect;
+                    headerBox.width = WIDTH;
+                    statusBarBox = { 0, HEIGHT - 30, WIDTH, 30 };
+                    createSlider(lineSlider, WIDTH - 25, headerBox.y + headerBox.height, 25, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height), 0, 0, 0, 1);
+                    createSlider(colSlider, 0, HEIGHT - statusBarBox.height - lineSlider.rect.width, WIDTH - lineSlider.rect.width, lineSlider.rect.width, 0, 0, 0, 1);
+                    lineSlider.rect.height -= colSlider.rect.height;
+                    textBox = { 0, (headerBox.y + headerBox.height), WIDTH - lineSlider.rect.width, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height + colSlider.rect.height) };
+                    colSlider.exists = !WordWrap;
+                    lineSlider.rect.height += (colSlider.exists ? -1 : 1) * colSlider.rect.height;
+                    textBox.height += (colSlider.exists ? -1 : 1) * colSlider.rect.height;
+                }
+                else SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
                 break;
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
@@ -129,7 +156,7 @@ int main()
             if (isClicked(header[0].options[0]))
                 clickedOnHeader = true, NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if (isClicked(header[0].options[1]))
-                clickedOnHeader = true, OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader = true, OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if (isClicked(header[0].options[2]))
                 clickedOnHeader = true, SaveFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if (isClicked(header[0].options[3]))
@@ -215,7 +242,7 @@ int main()
         background(WHITE);
 
         PrintText(PosX, PosY, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Font, Lines);
-        settextstyle(COMPLEX_FONT, HORIZ_DIR, 2);
+        
 
         if (LineBeginFrame <= CurrLine && CurrLine <= LineEndFrame && ColBeginFrame <= CurrCol && CurrCol <= ColEndFrame)
             if ((millis() - lastCursorChanged) / 500 % 2 == 0 || (millis() - lastCursorChanged) / 1000 > 5)

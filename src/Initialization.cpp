@@ -22,7 +22,7 @@ void InitLine(int currLine, vector <string>& lines)
         lines.push_back("");
 }
 
-void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& rowsPerFrame, int& a, int& b, int& c, int& d)
+void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPerLine, int& rowsPerFrame, int& a, int& b, int& c, int& d, int windSizeX, int windSizeY)
 {
     currLine = 0, currCol = 0;
     posX = CHAR_WIDTH, posY = windSizeY / 10;
@@ -32,9 +32,9 @@ void Initialize(int& currLine, int& currCol, int& posX, int& posY, int& charsPer
 }
 
 
-void setOptions()
+void setOptions(int windSizeX, int windSizeY)
 {
-    initwindow(windSizeX, windSizeY, "Editor de Texte");
+    initwindow(windSizeX, windSizeY, "Text Editor", (getmaxwidth() - windSizeX) / 2, (getmaxheight() - windSizeY) / 2);
     setbkcolor(15);
     bar(0, 0, windSizeX, windSizeY);
     setcolor(0);
