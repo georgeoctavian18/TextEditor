@@ -1,45 +1,37 @@
 #ifndef LOADING_H_INCLUDED
 #define LOADING_H_INCLUDED
 
-void loadLanguage(dropdown header[], int nr_header)
+void loadLanguage(dropdown header[], int nr_header, const char file[])
 {
-    ifstream f("data\\english.txt");
+    ifstream f(file);
     int i, j;
-    for (i=0; i<nr_header; i++)
+
+    for (i=0; i < nr_header; i++)
     {
         f.getline(header[i].text, 101);
-        for (j=0; j<header[i].nr_options; j++)
+        for (j=0; j < header[i].nr_options; j++)
             f.getline(header[i].options[j].text, 101);
     }
 
     f.close();
 }
 
-void createHeader(dropdown header[], int &nr_header)
+void loadTheme(const char file[], palette* theme)
 {
-    ifstream f("data\\header_settings.txt");
-    int w, h, col1, col2, col3, r, g, b;
-    f>>w>>h;
-    f>>r>>g>>b;
-    col1=COLOR(r, g, b);
-    f>>r>>g>>b;
-    col2=COLOR(r, g, b);
-    f>>r>>g>>b;
-    col3=COLOR(r, g, b);
-    int i, j, nr_options;
-    f>>nr_header;
-    for (i=0; i<nr_header; i++)
+    int i, r, g, b, *v;
+    v=(int*)theme;
+    ifstream f(file);
+    for (i=0; i<sizeof(palette)/sizeof(int); i++)
     {
-        f>>nr_options;
-        createDropdown(header[i], i*w, 0, w, h, col1, col2, col3, w/10, nr_options);
-        for (j=0; j<header[i].nr_options; j++)
-            createButton(header[i].options[j], header[i].rect.x, header[i].rect.y+h+j*h, w, h, col1, col2, header[i].padding);
+        f>>r>>g>>b;
+        v[i]=COLOR(r, g, b);
     }
     f.close();
+}
 
-    loadLanguage(header, nr_header);
-
-    int offset=0;
+void resizeHeader(dropdown header[], int &nr_header)
+{
+    int offset=0, i, j;
     for (i=0; i<nr_header; i++)
     {
         header[i].rect.x = offset;
@@ -64,7 +56,49 @@ void createHeader(dropdown header[], int &nr_header)
         for (j=0; j<header[i].nr_options; j++)
             header[i].options[j].rect.width = maxi;
     }
+}
 
+void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, struct rectangle& statusBarBox, slider& lineSlider, slider& colSlider, struct rectangle& textBox, palette* theme)
+{
+    ifstream f("data\\window_layout.txt");
+    int i, j;
+    float h;
+
+    f>>h>>nr_header;
+    for (i=0; i<nr_header; i++)
+    {
+        header[i].rect.y = 0;
+        header[i].rect.height = h;
+        header[i].theme = theme;
+        header[i].col = theme->button_default;
+        header[i].padding = h/2;
+        header[i].isSelected = false;
+        f>>header[i].nr_options;
+
+        for (j=0; j<header[i].nr_options; j++)
+        {
+            header[i].options[j].rect.y = header[i].rect.y+h+j*h;
+            header[i].options[j].rect.height = h;
+            header[i].options[j].theme = theme;
+            header[i].options[j].col = theme->button_default;
+            header[i].options[j].padding = header[i].padding;
+        }
+    }
+
+    loadLanguage(header, nr_header, "data\\english.lang");
+    resizeHeader(header, nr_header);
+
+    headerBox = header[0].rect;
+    headerBox.width = WIDTH;
+    f>>h;
+    statusBarBox = {0, HEIGHT - h, WIDTH, h};
+    f>>h;
+    createSlider(lineSlider, WIDTH-h, headerBox.y + headerBox.height, h, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height), 0, 0, 0, 1, theme);
+    createSlider(colSlider, 0, HEIGHT - statusBarBox.height - lineSlider.rect.width, WIDTH - lineSlider.rect.width, lineSlider.rect.width, 0, 0, 0, 1, theme);
+    lineSlider.rect.height -= colSlider.rect.height;
+    textBox = { 0, (headerBox.y + headerBox.height), WIDTH - lineSlider.rect.width, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height + colSlider.rect.height) };
+
+    f.close();
 }
 
 #endif // LOADING_H_INCLUDED

@@ -3,7 +3,7 @@
 bool getOpenPath(char path[])
 {
     strcpy(path, "\0");
-    char filter[256] = "Text Files (*.txt)\0*.txt\0All Files\0*.*\0\0";
+    char filter[256] = "Text Files (*.txt)\0*.txt\0All Files(*.*)\0*.*\0\0";
     tagOFNA info = { sizeof(OPENFILENAME), NULL, 0, filter, NULL, 0, 0, path, 1024, NULL, 0, NULL, NULL, 0 };
     tagOFNA* p = &info;
     return GetOpenFileNameA(p);
@@ -12,7 +12,7 @@ bool getOpenPath(char path[])
 bool getSavePath(char path[])
 {
     strcpy(path, "\0");
-    char filter[256] = "Text Files (*.txt)\0*.txt\0All Files\0*.*\0\0";
+    char filter[256] = "Text Files (*.txt)\0*.txt\0All Files(*.*)\0*.*\0\0";
     tagOFNA info = { sizeof(OPENFILENAME), NULL, 0, filter, NULL, 0, 0, path, 1024, NULL, 0, NULL, NULL, 0 };
     tagOFNA* p = &info;
     return GetSaveFileNameA(p);

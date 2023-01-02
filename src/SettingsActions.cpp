@@ -93,13 +93,13 @@ void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
 {
     char line[1000];
 
+    if (!getOpenPath(path))
+        return;
+
     isSaved = true;
     lines.clear();
     enterLines.clear();
     currLine = currCol = 0;
-
-    if (!getOpenPath(path))
-        strcpy(path, "\0");
 
     getNameFromPath(path, fileName);
 
@@ -112,15 +112,16 @@ void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
         EnterKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
     }
     fin.close();
-    
+
 }
 
 void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
 {
     if (!getSavePath(path))
-        strcpy(path, "\0");
+        return;
 
     getNameFromPath(path, fileName);
+
     isSaved = true;
 
     ofstream fout(path);
@@ -135,6 +136,7 @@ void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char
 
 void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
 {
+    /*
     if (!getSavePath(path))
         strcpy(path, "\0");
 
@@ -144,6 +146,10 @@ void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fi
     ofstream fout(path);
     fout << "";
     fout.close();
+    */
+
+    isSaved = true;
+    strcpy(fileName, "Untitled");
 
     currLine = currCol = 0;
     lines.clear();
@@ -168,42 +174,53 @@ void SaveFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
     fout.close();
 }
 
-void SelectWindowSize(int& windSizeX, int& windSizeY)
+void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang)
 {
     bool close = false, box = false;
-    int x = 125, y = 45;
-    char ch = '\0', p[3] = {'X', ':', '\0'};
+    int x = 125, y = 45, line = 0;
+    char ch = '\0', p[3] = {'X', ':', '\0'}, text[50];
     initwindow(300, 150, "Text Editor", (getmaxwidth() - 300) / 2, (getmaxheight() - 150) / 2);
-    setcolor(0);
-    setbkcolor(15);
+    setfillstyle(SOLID_FILL, theme.background);
+    setcolor(theme.text);
+    setbkcolor(theme.background);
     bar(0, 0, 300, 150);
-    
+
     outtextxy(80, 45, p);
     p[0] = 'Y';
     outtextxy(80, 95, p);
 
-    
-    setfillstyle(SOLID_FILL, 7);
+
+    setfillstyle(SOLID_FILL, theme.scroll_background);
     bar(115, 40, 185, 70);
     bar(115, 90, 185, 120);
 
     settextstyle(8, HORIZ_DIR, 2);
-    setfillstyle(SOLID_FILL, 15);
+    setfillstyle(SOLID_FILL, theme.text);
 
-    char text[50] = "Select the dimensions:", printArray[50];
+    ifstream fin("data\\window_resize.txt");
+    while (fin.getline(text, 50) && line < lang)
+        line++;
+    fin.close();
+
+    char printArray[50];
     string stText, ndText;
 
     outtextxy(10, 10, text);
 
-    setbkcolor(7);
-    
+    setbkcolor(theme.scroll_background);
+
     while (!close)
     {
         if (kbhit())
         {
             ch = getch();
             if (ch == CR)
-                close = true;
+            {
+                if (!box)
+                    box = true;
+                else close = true;
+            }
+                
             else if (ch == 0)
             {
                 ch = getch();
@@ -221,10 +238,10 @@ void SelectWindowSize(int& windSizeX, int& windSizeY)
                     else if (ch == BS && !stText.empty())
                     {
                         stText.pop_back();
-                        setfillstyle(SOLID_FILL, 7);
+                        setfillstyle(SOLID_FILL, theme.scroll_background);
                         bar(115, 40, 185, 70);
                         bar(115, 90, 185, 120);
-                        setfillstyle(SOLID_FILL, 15);
+                        setfillstyle(SOLID_FILL, theme.text);
                     }
                 }
                 else
@@ -234,15 +251,15 @@ void SelectWindowSize(int& windSizeX, int& windSizeY)
                     else if (ch == BS && !ndText.empty())
                     {
                         ndText.pop_back();
-                        setfillstyle(SOLID_FILL, 7);
+                        setfillstyle(SOLID_FILL, theme.scroll_background);
                         bar(115, 40, 185, 70);
                         bar(115, 90, 185, 120);
-                        setfillstyle(SOLID_FILL, 15);
+                        setfillstyle(SOLID_FILL, theme.text);
                     }
                 }
             }
         }
-        
+
         string copySt = stText;
         StringToArray(copySt, printArray);
         outtextxy(x, y, printArray);
@@ -250,13 +267,28 @@ void SelectWindowSize(int& windSizeX, int& windSizeY)
         string copyNd = ndText;
         StringToArray(copyNd, printArray);
         outtextxy(x, y + 50, printArray);
-        
-        //swapbuffers();
     }
 
-    std::string::size_type sz;
-    windSizeX = stoi(stText, &sz);
-    windSizeY = stoi(ndText, &sz);
-    
+    if (!stText.empty() && !ndText.empty())
+    {
+        int newWindX, newWindY;
+        std::string::size_type sz;
+        newWindX = stoi(stText, &sz);
+        newWindY = stoi(ndText, &sz);
+
+        if (newWindX >= 100 && newWindX <= getmaxwidth() && newWindY >= 100 && newWindY <= getmaxheight())
+            windSizeX = newWindX, windSizeY = newWindY;
+    }
+   
     closegraph();
+}
+
+void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int posX, int& posY, int& rowsPerFrame, int& charsPerLine, int& lineBeginFrame, int& lineEndFrame, int& colBeginFrame, int& colEndFrame)
+{
+    currLine = 0, currCol = 0;
+    posY = windSizeY / 10;
+    rowsPerFrame = (windSizeY - 2 * posY) / CHAR_HEIGHT;
+    charsPerLine = (windSizeX - 4 * posX) / CHAR_WIDTH;
+    lineBeginFrame = 0, lineEndFrame = rowsPerFrame - 1;
+    colBeginFrame = 0, colEndFrame = charsPerLine;
 }

@@ -6,12 +6,12 @@ void PrintCursor(int x1, int y1, int x2, int y2, int color)
     line(x1, y1, x2, y2);
 }
 
-void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int colBeginFrame, int colEndFrame, int selectBeginLine, int selectBeginCol, int selectEndLine, int selectEndCol, int font, vector <string> lines)
+void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int colBeginFrame, int colEndFrame, int selectBeginLine, int selectBeginCol, int selectEndLine, int selectEndCol, int font, vector <string> lines, palette* theme)
 {
-    setcolor(BLACK);
-    setbkcolor(WHITE);
+    setcolor(theme->text);
+    setbkcolor(theme->background);
     settextjustify(LEFT_TEXT, TOP_TEXT);
-    
+
 
     int yTemp = posY;
 
@@ -32,16 +32,16 @@ void PrintText(int posX, int posY, int lineBeginFrame, int lineEndFrame, int col
                 PrintArray[0] = ' ';
 
             if (selectBeginLine == selectEndLine && selectBeginCol == selectEndCol)
-                setbkcolor(WHITE);
+                setbkcolor(theme->background);
             else if (selectBeginLine == selectEndLine && i == selectEndLine && j >= selectBeginCol && j < selectEndCol)
-                setbkcolor(COLOR(200, 200, 255));
+                setbkcolor(theme->text_selected);
             else if(i == selectBeginLine && j >= selectBeginCol && i != selectEndLine)
-                setbkcolor(COLOR(200, 200, 255));
+                setbkcolor(theme->text_selected);
             else if(i != selectBeginLine && i == selectEndLine && j < selectEndCol)
-                setbkcolor(COLOR(200, 200, 255));
+                setbkcolor(theme->text_selected);
             else if(i > selectBeginLine && i < selectEndLine && i != selectEndLine)
-                setbkcolor(COLOR(200, 200, 255));
-            else setbkcolor(WHITE);
+                setbkcolor(theme->text_selected);
+            else setbkcolor(theme->background);
 
             outtextxy(xTemp, yTemp, PrintArray);
 
