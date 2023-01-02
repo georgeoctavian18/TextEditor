@@ -16,4 +16,6 @@ void SaveFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
 
 void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved);
 
-void SelectWindowSize(int& windSizeX, int& windSizeY);
+void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang);
+
+void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int posX, int& posY, int& rowsPerFrame, int& charsPerLine, int& lineBeginFrame, int& lineEndFrame, int& colBeginFrame, int& colEndFrame);

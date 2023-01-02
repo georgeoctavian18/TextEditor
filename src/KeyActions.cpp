@@ -396,12 +396,15 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
         break;
     case KEY_F1:
         settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
+        font = DEFAULT_FONT;
         break;
     case KEY_F2:
         settextstyle(BOLD_FONT, HORIZ_DIR, 2);
+        font = BOLD_FONT;
         break;
     case KEY_F3:
         settextstyle(COMPLEX_FONT, HORIZ_DIR, 2);
+        font = COMPLEX_FONT;
         break;
     }
 }

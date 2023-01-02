@@ -45,9 +45,9 @@ void filledRect(float x, float y, float w, float h, int fillColor, int borderCol
     rectangle(x, y, x + w, y + h);
 }
 
-void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines, char fileName[], struct rectangle box, bool isSaved)
+void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& enterLines, char fileName[], struct rectangle box, bool isSaved, palette* theme)
 {
-    filledRect(box.x, box.y, box.width - 1, box.height - 1, COLOR(255, 255, 255), COLOR(0, 0, 0));
+    filledRect(box.x, box.y, box.width - 1, box.height - 1, theme->background, theme->contrast);
     int i, lin, col, maxi;
     lin = 0;
     maxi = -1;
@@ -63,11 +63,8 @@ void statusBar(int CurrLine, int CurrCol, vector<string>& lines, vector<int>& en
         col += lines[i].size();
     col += CurrCol;
 
-    string fileName2 = fileName;
-    if (!isSaved) fileName2 += "*";
-
-    bgiout << "Lin " << lin + 1 << ", Col " << col + 1 << "   " << fileName2;
-    setbkcolor(WHITE);
+    bgiout << "Lin " << lin + 1 << ", Col " << col + 1 << "   " << fileName << (!isSaved?'*':'\0');
+    setbkcolor(theme->background);
     outstreamxy(10, box.y + 1);
 }
 
@@ -85,7 +82,7 @@ void movePage(int CurrLine, int CurrCol, int &LineBeginFrame, int &ColBeginFrame
     else if (CurrCol <= ColBeginFrame)
     {
         if (CurrCol <= Lines[CurrLine].size())
-            ColBeginFrame = 0, ColEndFrame = CharsPerLine;
+            ColBeginFrame = max(0, ColBeginFrame - CharsPerLine), ColEndFrame = max(CharsPerLine, ColEndFrame - CharsPerLine);
         else ColBeginFrame = CurrCol, ColEndFrame--;
     }
 

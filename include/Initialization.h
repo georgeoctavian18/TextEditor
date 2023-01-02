@@ -30,9 +30,15 @@ using namespace std;
 #define CTRLZ 'Z'-'A'+1
 #define CTRLS 'S'-'A'+1
 #define CTRLN 'N'-'A'+1
+#define CTRLO 'O'-'A'+1
 
 
-
+struct palette
+{
+    int background, text, text_selected, contrast;
+    int button_default, button_hovering, button_selected;
+    int scroll_background, scroll_button, scroll_selected;
+};
 
 void setOptions(int windSizeX, int windSizeY);
 
