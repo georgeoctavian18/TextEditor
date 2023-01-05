@@ -22,7 +22,7 @@ void Deletion(int selectBeginLine, int selectBeginCol, int& currLine, int& currC
         return;
     }
 
-    while (currLine != selectBeginLine || currCol != selectBeginCol)
+    while (currLine != selectBeginLine || currCol != selectBeginCol && currCol > 0)
         BackspaceKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
 }
 

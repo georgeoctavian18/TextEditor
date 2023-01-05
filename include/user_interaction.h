@@ -11,7 +11,6 @@ bool isMouseClicked_helper = false;
 bool isMouseDoubleClicked_helper = false;
 bool windowShouldClose = false;
 bool beginSelection = false;
-bool functionMode = false;
 
 void mousePressed(int x, int y)
 {
@@ -64,35 +63,35 @@ int kindOfWord(char c)
     return 3;
 }
 
-void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, int LineBeginFrame, int LineEndFrame, int ColBeginFrame, int ColEndFrame, vector<string>& Lines, vector<int> EnterLines, struct rectangle textScreen)
+vector2 mouseBeginPos;
+
+void clickOnText(int textBeginX, int textBeginY, int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, int &LineBeginFrame, int &LineEndFrame, int &ColBeginFrame, int &ColEndFrame, vector<string>& Lines, vector<int> EnterLines, struct rectangle textScreen)
 {
-    int textBeginY = HEIGHT / 10;
-    int textBeginX = CHAR_WIDTH;
+    //int textBeginY = HEIGHT / 10;
+    //int textBeginX = CHAR_WIDTH;
     vector2 mouse = { mousex(), mousey() };
 
+    int i, j, si, sj, mini, maxi;
+    bool g;
+    mini = -1;
+    maxi = Lines.size();
+    for (i=0; i<EnterLines.size(); i++)
+    {
+        if (CurrLine1<=EnterLines[i] && EnterLines[i]<maxi)
+            maxi = EnterLines[i];
+        if (mini<EnterLines[i] && EnterLines[i]<CurrLine1)
+            mini = EnterLines[i];
+    }
 
     if (Lines.size()>0 && isInsideRect(mouse, textScreen))
     {
-        int i, j, si, sj, mini, maxi;
-        bool g;
-        mini = -1;
-        maxi = Lines.size();
-        for (i=0; i<EnterLines.size(); i++)
-        {
-            if (CurrLine1<=EnterLines[i] && EnterLines[i]<maxi)
-                maxi = EnterLines[i];
-            if (mini<EnterLines[i] && EnterLines[i]<CurrLine1)
-                mini = EnterLines[i];
-        }
-
-
-
         if (isMouseClicked)
         {
+            mouseBeginPos = mouse;
             if (mouse.y < textBeginY)
                 CurrLine1 = LineBeginFrame;
             else
-                if (mouse.y > textBeginY + (Lines.size() - 1 - LineBeginFrame) * CHAR_HEIGHT)
+                if (mouse.y > textBeginY + min((int)Lines.size() - 1 - LineBeginFrame, LineEndFrame-LineBeginFrame) * CHAR_HEIGHT)
                     CurrLine1 = min((int)Lines.size() - 1, LineEndFrame);
                 else
                     CurrLine1 = LineBeginFrame + (mouse.y - textBeginY) / CHAR_HEIGHT;
@@ -107,7 +106,7 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
             beginSelection = true;
 
             si = CurrLine1;
-            sj = (CurrCol1==Lines[CurrLine1].size()?CurrCol1-1:CurrCol1);
+            sj = max(0, (CurrCol1==Lines[CurrLine1].size()?CurrCol1-1:CurrCol1));
             if (Lines[si][sj]=='\t')
             {
                 g = false;
@@ -141,6 +140,8 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
         {
             si = CurrLine1;
             sj = (CurrCol1==Lines[CurrLine1].size()?CurrCol1-1:CurrCol1);
+            if (sj<0)
+                sj=0;
             int caz = kindOfWord(Lines[si][sj]);
             g = false;
             for (j=sj; j<Lines[si].size() && !g; j++)
@@ -165,58 +166,79 @@ void clickOnText(int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, i
             CurrCol1 = (g?j+2:j);
         }
 
-        if (isMouseDown && beginSelection)
+    }
+
+    if (isMouseDown && beginSelection)
+    {
+        if (mouse.y < textBeginY)
+            CurrLine2 = LineBeginFrame;
+        else
+            if (mouse.y > textBeginY + min((int)Lines.size() - 1 - LineBeginFrame, LineEndFrame-LineBeginFrame) * CHAR_HEIGHT)
+                CurrLine2 = min((int)Lines.size() - 1, LineEndFrame);
+            else
+                CurrLine2 = LineBeginFrame + (mouse.y - textBeginY) / CHAR_HEIGHT;
+
+        if (mouse.x < textBeginX)
+            CurrCol2 = ColBeginFrame;
+        else
+            if (mouse.x > textBeginX + min(((int)Lines[CurrLine2].size() - ColBeginFrame), ColEndFrame-ColBeginFrame)* CHAR_WIDTH)
+                CurrCol2 = min((int)Lines[CurrLine2].size(), ColEndFrame);
+            else
+                CurrCol2 = ColBeginFrame + (mouse.x - textBeginX + CHAR_WIDTH/2)/CHAR_WIDTH;
+
+        si = CurrLine2;
+        sj = (CurrCol2==Lines[CurrLine2].size()?CurrCol2-1:CurrCol2);
+        if (sj<0)
+            sj=0;
+        if (Lines[si][sj]=='\t')
         {
-            if (mouse.y < textBeginY)
-                CurrLine2 = LineBeginFrame;
-            else
-                if (mouse.y > textBeginY + (Lines.size() - 1 - LineBeginFrame) * CHAR_HEIGHT)
-                    CurrLine2 = min((int)Lines.size() - 1, LineEndFrame);
-                else
-                    CurrLine2 = LineBeginFrame + (mouse.y - textBeginY) / CHAR_HEIGHT;
-
-            if (mouse.x < textBeginX)
-                CurrCol2 = ColBeginFrame;
-            else
-                if (mouse.x > textBeginX + min(((int)Lines[CurrLine2].size() - ColBeginFrame), ColEndFrame-ColBeginFrame)* CHAR_WIDTH)
-                    CurrCol2 = min((int)Lines[CurrLine2].size(), ColEndFrame);
-                else
-                    CurrCol2 = ColBeginFrame + (mouse.x - textBeginX + CHAR_WIDTH/2)/CHAR_WIDTH;
-            lastCursorChanged = millis();
-
-            si = CurrLine2;
-            sj = (CurrCol2==Lines[CurrLine2].size()?CurrCol2-1:CurrCol2);
-            if (Lines[si][sj]=='\t')
-            {
-                g = false;
-                for (j=sj; j>0 && !g; j--)
+            g = false;
+            for (j=sj; j>0 && !g; j--)
+                if (Lines[si][j]!='\t')
+                    g = true;
+            for (i=si-1; i>=0 && i>mini && !g; i--)
+                for (j=Lines[i].size()-1; j>=0 && !g; j--)
                     if (Lines[si][j]!='\t')
                         g = true;
-                for (i=si-1; i>=0 && i>mini && !g; i--)
-                    for (j=Lines[i].size()-1; j>=0 && !g; j--)
-                        if (Lines[si][j]!='\t')
-                            g = true;
-                CurrLine2 = i+1;
-                CurrCol2 = (g?j+2:j);
+            CurrLine2 = i+1;
+            CurrCol2 = (g?j+2:j);
 
-                i = CurrLine2;
-                j = CurrCol2;
-                while (i<si || j<sj)
+            i = CurrLine2;
+            j = CurrCol2;
+            while (i<si || j<sj)
+            {
+                j+=4;
+                if (j>Lines[i].size())
                 {
-                    j+=4;
-                    if (j>Lines[i].size())
-                    {
-                        i++;
-                        j=4;
-                    }
+                    i++;
+                    j=4;
                 }
-                CurrLine2 = i;
-                CurrCol2 = (sj-(j-4)<=2?j-4:j);
             }
+            CurrLine2 = i;
+            CurrCol2 = (sj-(j-4)<=2?j-4:j);
         }
-        else
-            beginSelection = false;
+        int frequency=30;
+        if (lastCursorChanged/frequency<millis()/frequency)
+        {
+            if (mouse.x > mouseBeginPos.x && mouse.x > textBeginX + (ColEndFrame-ColBeginFrame)* CHAR_WIDTH && Lines[CurrLine2].size()>ColEndFrame)
+                RightArrowKey(CurrLine2, CurrCol2, ColEndFrame-ColBeginFrame, Lines, EnterLines);
+            else if (mouse.x < mouseBeginPos.x && mouse.x < textBeginX && CurrCol2>0)
+                LeftArrowKey(CurrLine2, CurrCol2, ColEndFrame-ColBeginFrame, Lines, EnterLines);
+            if (mouse.y < mouseBeginPos.y && mouse.y < textBeginY && CurrLine2>0)
+                UpArrowKey(CurrLine2, CurrCol2, ColEndFrame-ColBeginFrame, Lines, EnterLines);
+            else if (mouse.y > mouseBeginPos.y && mouse.y > textBeginY + (LineEndFrame-LineBeginFrame+1)* CHAR_HEIGHT && Lines.size()>LineEndFrame+1)
+                DownArrowKey(CurrLine2, CurrCol2, ColEndFrame-ColBeginFrame, Lines, EnterLines);
+        }
+
+        lastCursorChanged = millis();
+        movePage(CurrLine2, CurrCol2, LineBeginFrame, ColBeginFrame, LineEndFrame, ColEndFrame, LineEndFrame-LineBeginFrame+1, ColEndFrame-ColBeginFrame, Lines);
     }
+    else
+        beginSelection = false;
+    if (CurrCol1<0)
+        CurrCol1=0;
+    if (CurrCol2<0)
+        CurrCol2=0;
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -331,6 +353,10 @@ void createSlider(slider &s, float x, float y, float w, float h, int minState, i
 }
 
 void clickVerticalSlider(slider& s){
+    if (s.state<s.minState)
+            s.state = s.minState;
+    if (s.state>s.maxState)
+        s.state = s.maxState;
     s.active = (s.minState!=s.maxState);
 
     if (s.exists && s.active)
@@ -368,6 +394,10 @@ void clickVerticalSlider(slider& s){
 }
 
 void clickHorizontalSlider(slider& s){
+    if (s.state<s.minState)
+        s.state = s.minState;
+    if (s.state>s.maxState)
+        s.state = s.maxState;
     s.active = (s.minState!=s.maxState);
 
     if (s.exists && s.active)

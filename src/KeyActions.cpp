@@ -37,7 +37,7 @@ void EnterKey(int& currLine, int& currCol, int charsPerLine, vector <string>& li
 
         if(currCol < lines[currLine].size())
             lines[currLine].erase(currCol);
-        
+
         currLine++;
     }
     InitLine(currLine, lines);
@@ -78,7 +78,7 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
                     if (enterLines[j] >= i)
                         enterLines[j]++;
             }
-            
+
             while (lines[i].size() > charsPerLine)
             {
                 position = -1;
@@ -252,7 +252,7 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
                         else if (wordStart >= 0)
                         {
                             int line = i + 1, col = 0;
-                                
+
                             for(int p = wordStart + 1; p < lines[i].size(); p++)
                                 InsertKey(line, col, charsPerLine, lines[i][p], lines, enterLines, wordWrap);
 
@@ -260,9 +260,9 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
                             currCol = lines[i].size() - wordStart - 1;
 
                             lines[i].erase(lines[i].begin() + wordStart, lines[i].end());
-                            
+
                         }
-                        
+
                     }
                     emptySpace = charsPerLine - lines[i].size();
                 }
@@ -392,7 +392,7 @@ void SpecialKey(int& selectBeginLine, int& selectBeginCol, int& currLine, int& c
         DeleteKey(selectBeginLine, selectBeginCol, currLine, currCol, charsPerLine, lines, enterLines, stackLines, stackEnterLines, stackLinCol, wordWrap, isSaved);
         break;
     case KEY_F5:
-        DateTimeKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap, isSaved); 
+        DateTimeKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap, isSaved);
         break;
     case KEY_F1:
         settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
@@ -457,7 +457,7 @@ void UpArrowKey(int& currLine, int& currCol, int charsPerLine, vector <string> l
             int j = currCol, nrRgt = 0, nrLft = 0;
             while (j < lines[currLine].size() && lines[currLine][j] == '\t')
                 j++, nrRgt++;
-            
+
 
             j = currCol - 1;
             while (j >= 0 && lines[currLine][j] == '\t')
@@ -547,7 +547,7 @@ void DateTimeKey(int& currLine, int& currCol, int charsPerLine, vector <string>&
     time_t now = time(NULL);
     tm* ptm = localtime(&now);
     isSaved = true;
-    // Format: Mo, 20:20 15/06/2009 
+    // Format: Mo, 20:20 15/06/2009
     strftime(buffer, 32, "%a, %H:%M %d/%m/%Y", ptm);
 
     for (int i = 0; i < strlen(buffer); i++)

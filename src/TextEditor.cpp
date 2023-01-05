@@ -23,9 +23,10 @@ int main()
     palette theme;
     slider lineSlider, colSlider;
     struct rectangle headerBox, statusBarBox, textBox;
+    int lang_selected=0;
 
     loadTheme("data\\light_theme.thm", &theme);
-    loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme);
+    loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
 
     vector <string> Lines, CopiedLines;
     vector <int> EnterLines, EnterLinesCopied;
@@ -35,9 +36,10 @@ int main()
     char Ch = '\0';
     int CurrLine, CurrCol, SelectBeginLine, SelectBeginCol;
     int PosX, PosY, CharsPerLine, RowsPerFrame, Command, Font = COMPLEX_FONT;
-    int a, b, c, d, lang = 0;
+    int a, b, c, d;
 
     Initialize(CurrLine, CurrCol, PosX, PosY, CharsPerLine, RowsPerFrame, a, b, c, d, WindSizeX, WindSizeY);
+    InitLine(CurrLine, Lines);
 
     SelectBeginLine = CurrLine;
     SelectBeginCol = CurrCol;
@@ -45,9 +47,9 @@ int main()
     int LineBeginFrame = 0, LineEndFrame = RowsPerFrame - 1;
     int ColBeginFrame = 0, ColEndFrame = CharsPerLine;
 
-    bool ShowStatusBar = true;
+    bool ShowStatusBar = true, Resize = false;
     bool WordWrap = false, isSaved = true;
-    bool KeepSelect;
+    bool KeepSelect = false;
 
     char Path[1024] = "\0", FileName[256] = "Untitled";
 
@@ -58,7 +60,7 @@ int main()
         updateFlags();
 
         //UPDATE
-
+        Ch=0;
         if (kbhit())
         {
             KeepSelect = false;
@@ -73,12 +75,13 @@ int main()
                 Command = getch();
                 if (Command == KEY_F4)
                 {
-                    SelectWindowSize(WindSizeX, WindSizeY, theme, lang);
+                    SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected);
                     setOptions(WindSizeX, WindSizeY);
                     setupFlags();
                     ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame);
-                    loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme);
                     settextstyle(Font, HORIZ_DIR, 2);
+                    loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
+                    header[0].isSelected = false;
                 }
                 else SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
                 break;
@@ -113,7 +116,11 @@ int main()
                 NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved);
                 break;
            default:
-               Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
+                Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
+                for (int i=0; i<Lines.size(); i++)
+                    if (Lines[i].size()>maxi)
+                        maxi = Lines[i].size();
+                maxi = max(0, maxi-CharsPerLine);
             }
 
             a = c = PosX + CurrCol * CHAR_WIDTH;
@@ -143,7 +150,7 @@ int main()
                 windowShouldClose = true;
         }
 
-        if ((header[0].isSelected && clickedOnHeader) || (Ch==CTRLN || Ch==CTRLO || Ch==CTRLS))
+        if ((header[0].isSelected && clickedOnHeader) || Ch==CTRLS || Ch==CTRLO || Ch==CTRLN)
         {
             maxi = 0;
             for (int i=0; i<Lines.size(); i++)
@@ -153,9 +160,11 @@ int main()
             movePage(CurrLine, CurrCol, LineBeginFrame, ColBeginFrame, LineEndFrame, ColEndFrame, RowsPerFrame, CharsPerLine, Lines);
             lastCursorChanged=millis();
         }
+        /*
         else
             if (ColBeginFrame>maxi)
                 maxi = ColBeginFrame;
+        */
 
         if (header[1].isSelected)
         {
@@ -199,9 +208,15 @@ int main()
                     DoWordWrap(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
                     LineBeginFrame = 0, LineEndFrame = RowsPerFrame - 1;
                     ColBeginFrame = 0, ColEndFrame = CharsPerLine;
+                    maxi = 0;
                 }
                 else
                     UndoWordWrap(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
+                for (int i=0; i<Lines.size(); i++)
+                    if (Lines[i].size()>maxi)
+                        maxi = Lines[i].size();
+                maxi = max(0, maxi-CharsPerLine);
+
 
                 colSlider.exists = !WordWrap;
                 lineSlider.rect.height += (colSlider.exists?-1:1)*colSlider.rect.height;
@@ -225,12 +240,14 @@ int main()
             if (isClicked(header[2].options[2]))
             {
                 clickedOnHeader = true;
-                SelectWindowSize(WindSizeX, WindSizeY, theme, lang);
+                SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected);
                 setOptions(WindSizeX, WindSizeY);
                 setupFlags();
                 ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame);
-                loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme);
                 settextstyle(Font, HORIZ_DIR, 2);
+                loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
+                Resize = true; 
+                SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             }
         }
 
@@ -245,11 +262,11 @@ int main()
         if (header[4].isSelected)
         {
             if (isClicked(header[4].options[0]))
-                clickedOnHeader = true, settextstyle(COMPLEX_FONT, HORIZ_DIR, 2);
+                clickedOnHeader = true, settextstyle(COMPLEX_FONT, HORIZ_DIR, 2), Font=COMPLEX_FONT;
             if (isClicked(header[4].options[1]))
-                clickedOnHeader = true, settextstyle(BOLD_FONT, HORIZ_DIR, 2);
+                clickedOnHeader = true, settextstyle(BOLD_FONT, HORIZ_DIR, 2), Font=BOLD_FONT;
             if (isClicked(header[4].options[2]))
-                clickedOnHeader = true, settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
+                clickedOnHeader = true, settextstyle(DEFAULT_FONT, HORIZ_DIR, 2), Font=DEFAULT_FONT;
         }
 
         if (header[4].isSelected && clickedOnHeader)
@@ -260,9 +277,9 @@ int main()
         if (header[5].isSelected)
         {
             if (isClicked(header[5].options[0]))
-                clickedOnHeader = true, lang = 0, loadLanguage(header, nr_header, "data\\english.lang");
+                clickedOnHeader = true, lang_selected = 0, loadLanguage(header, nr_header, "data\\english.lang");
             if (isClicked(header[5].options[1]))
-                clickedOnHeader = true, lang = 1, loadLanguage(header, nr_header, "data\\romana.lang");
+                clickedOnHeader = true, lang_selected = 1, loadLanguage(header, nr_header, "data\\romana.lang");
         }
 
         if (header[5].isSelected && clickedOnHeader)
@@ -272,7 +289,8 @@ int main()
 
         clickDropdown(header, nr_header);
         if (!clickedOnHeader)
-            clickOnText(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, Lines, EnterLines, textBox);
+            clickOnText(PosX, PosY, SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, Lines, EnterLines, textBox);
+
 
         lineSlider.maxState = max(0, (int)Lines.size()-RowsPerFrame);
         lineSlider.state = LineBeginFrame;
@@ -284,6 +302,7 @@ int main()
         colSlider.maxState = maxi;
         colSlider.state = ColBeginFrame;
         clickHorizontalSlider(colSlider);
+
         ColBeginFrame = colSlider.state;
         ColEndFrame = ColBeginFrame + CharsPerLine;
         //AFTERUPDATE
@@ -302,10 +321,30 @@ int main()
 
         filledRect(headerBox.x, headerBox.y, headerBox.width, headerBox.height, theme.button_default, theme.button_default);
         display(header, nr_header);
+
         if (header[2].isSelected)
         {
             displayFlag(header[2].options[0], WordWrap);
             displayFlag(header[2].options[1], ShowStatusBar);
+        }
+
+        if (header[3].isSelected)
+        {
+            displayFlag(header[3].options[0], theme.background==WHITE);
+            displayFlag(header[3].options[1], theme.background==BLACK);
+        }
+
+        if (header[4].isSelected)
+        {
+            displayFlag(header[4].options[0], Font==COMPLEX_FONT);
+            displayFlag(header[4].options[1], Font==BOLD_FONT);
+            displayFlag(header[4].options[2], Font==DEFAULT_FONT);
+        }
+
+        if (header[5].isSelected)
+        {
+            displayFlag(header[5].options[0], lang_selected==0);
+            displayFlag(header[5].options[1], lang_selected==1);
         }
 
         display(lineSlider);
@@ -318,6 +357,12 @@ int main()
 
         if (ShowStatusBar)
             statusBar(CurrLine, CurrCol, Lines, EnterLines, FileName, statusBarBox, isSaved, &theme);
+
+        if (Resize)
+        {
+            Resize = false;
+            header[0].isSelected = false;
+        }
 
         //AFTERFRAME
         swapbuffers();

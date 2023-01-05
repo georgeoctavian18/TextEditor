@@ -58,7 +58,7 @@ void resizeHeader(dropdown header[], int &nr_header)
     }
 }
 
-void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, struct rectangle& statusBarBox, slider& lineSlider, slider& colSlider, struct rectangle& textBox, palette* theme)
+void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, struct rectangle& statusBarBox, slider& lineSlider, slider& colSlider, struct rectangle& textBox, palette* theme, int lang_selected)
 {
     ifstream f("data\\window_layout.txt");
     int i, j;
@@ -85,7 +85,7 @@ void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, 
         }
     }
 
-    loadLanguage(header, nr_header, "data\\english.lang");
+    loadLanguage(header, nr_header, (lang_selected?"data\\romana.lang":"data\\english.lang"));
     resizeHeader(header, nr_header);
 
     headerBox = header[0].rect;
