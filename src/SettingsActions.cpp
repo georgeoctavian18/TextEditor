@@ -4,7 +4,7 @@
 
 void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& lines, vector <int>& enterLines)
 {
-    int spacePos, i = 0;
+    int spacePos, tabPos, position = -1, i = 0;
     string s;
 
     currLine = currCol = 0;
@@ -24,7 +24,10 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
 
         while (lines[i].size() > charsPerLine)
         {
+            position = -1;
             spacePos = lines[i].find_last_of(' ');
+            tabPos = lines[i].find_last_of('\t');
+
             int j = lines[i].size() - 1;
 
             if (lines[i][j] == '\t')
@@ -39,7 +42,7 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
                 continue;
             }
 
-            if (spacePos + 1 >= charsPerLine || spacePos == -1)
+            if ((spacePos == -1 || spacePos == charsPerLine) && (tabPos == charsPerLine || tabPos == -1))
             {
                 CharToString(s, lines[i].back());
                 lines[i].erase(lines[i].end() - 1);
@@ -47,7 +50,11 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
             }
             else
             {
-                while (j > spacePos)
+                if (spacePos == -1 || spacePos == charsPerLine) position = tabPos;
+                else if (tabPos == -1 || tabPos == charsPerLine) position = spacePos;
+                else position = max(spacePos, tabPos);
+
+                while (j > position)
                 {
                     CharToString(s, lines[i].back());
                     lines[i].erase(lines[i].end() - 1);
@@ -89,7 +96,7 @@ void UndoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>
         enterLines.push_back(i);
 }
 
-void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
+void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, stack <vector <string>>& stackLines, stack <vector <int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool& isSaved)
 {
     char line[1000];
 
@@ -113,6 +120,13 @@ void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
     }
     fin.close();
 
+    while (!stackLines.empty())
+        stackLines.pop();
+    while (!stackEnterLines.empty())
+        stackEnterLines.pop();
+    while (!stackLinCol.empty())
+        stackLinCol.pop();
+
 }
 
 void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
@@ -134,26 +148,20 @@ void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char
     fout.close();
 }
 
-void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
+void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, stack <vector <string>>& stackLines, stack <vector <int>>& stackEnterLines, stack <pair<int, int>>& stackLinCol, bool wordWrap, bool& isSaved)
 {
-    /*
-    if (!getSavePath(path))
-        strcpy(path, "\0");
-
-    getNameFromPath(path, fileName);
-    isSaved = true;
-
-    ofstream fout(path);
-    fout << "";
-    fout.close();
-    */
-
     isSaved = true;
     strcpy(fileName, "Untitled");
 
     currLine = currCol = 0;
     lines.clear();
     enterLines.clear();
+    while(!stackLines.empty())
+        stackLines.pop();
+    while(!stackEnterLines.empty())
+        stackEnterLines.pop();
+    while(!stackLinCol.empty())
+        stackLinCol.pop();
 }
 
 void SaveFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
@@ -174,11 +182,11 @@ void SaveFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
     fout.close();
 }
 
-void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang)
+void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang, const char projectDir[])
 {
     bool close = false, box = false;
     int x = 125, y = 45, line = 0;
-    char ch = '\0', p[3] = {'X', ':', '\0'}, text[50];
+    char ch = '\0', p[3] = {'X', ':', '\0'}, text[50], temp[1024];
     initwindow(300, 150, "Text Editor", (getmaxwidth() - 300) / 2, (getmaxheight() - 150) / 2);
     setfillstyle(SOLID_FILL, theme.background);
     setcolor(theme.text);
@@ -197,10 +205,13 @@ void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang)
     settextstyle(8, HORIZ_DIR, 2);
     setfillstyle(SOLID_FILL, theme.text);
 
+    GetCurrentDirectoryA(1024, temp);
+    SetCurrentDirectoryA(projectDir);
     ifstream fin("data\\window_resize.txt");
     while (fin.getline(text, 50) && line < lang)
         line++;
     fin.close();
+    SetCurrentDirectoryA(temp);
 
     char printArray[50];
     string stText, ndText;
@@ -220,7 +231,7 @@ void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang)
                     box = true;
                 else close = true;
             }
-                
+            else if (ch == ESC) close = true;
             else if (ch == 0)
             {
                 ch = getch();
@@ -279,7 +290,7 @@ void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang)
         if (newWindX >= 100 && newWindX <= getmaxwidth() && newWindY >= 100 && newWindY <= getmaxheight())
             windSizeX = newWindX, windSizeY = newWindY;
     }
-   
+
     closegraph();
 }
 

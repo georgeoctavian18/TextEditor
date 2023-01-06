@@ -1,8 +1,11 @@
 #ifndef LOADING_H_INCLUDED
 #define LOADING_H_INCLUDED
 
-void loadLanguage(dropdown header[], int nr_header, const char file[])
+void loadLanguage(const char projectDir[], const char file[], dropdown header[], int nr_header)
 {
+    char temp[1024];
+    GetCurrentDirectoryA(1024, temp);
+    SetCurrentDirectoryA(projectDir);
     ifstream f(file);
     int i, j;
 
@@ -12,14 +15,18 @@ void loadLanguage(dropdown header[], int nr_header, const char file[])
         for (j=0; j < header[i].nr_options; j++)
             f.getline(header[i].options[j].text, 101);
     }
-
     f.close();
+    SetCurrentDirectoryA(temp);
+
 }
 
-void loadTheme(const char file[], palette* theme)
+void loadTheme(const char projectDir[], const char file[], palette* theme)
 {
     int i, r, g, b, *v;
     v=(int*)theme;
+    char temp[1024];
+    GetCurrentDirectoryA(1024, temp);
+    SetCurrentDirectoryA(projectDir);
     ifstream f(file);
     for (i=0; i<sizeof(palette)/sizeof(int); i++)
     {
@@ -27,6 +34,7 @@ void loadTheme(const char file[], palette* theme)
         v[i]=COLOR(r, g, b);
     }
     f.close();
+    SetCurrentDirectoryA(temp);
 }
 
 void resizeHeader(dropdown header[], int &nr_header)
@@ -58,8 +66,11 @@ void resizeHeader(dropdown header[], int &nr_header)
     }
 }
 
-void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, struct rectangle& statusBarBox, slider& lineSlider, slider& colSlider, struct rectangle& textBox, palette* theme, int lang_selected)
+void loadLayout(const char projectDir[], dropdown header[], int &nr_header, struct rectangle &headerBox, struct rectangle& statusBarBox, slider& lineSlider, slider& colSlider, struct rectangle& textBox, palette* theme, int lang_selected)
 {
+    char temp[1024];
+    GetCurrentDirectoryA(1024, temp);
+    SetCurrentDirectoryA(projectDir);
     ifstream f("data\\window_layout.txt");
     int i, j;
     float h;
@@ -85,7 +96,7 @@ void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, 
         }
     }
 
-    loadLanguage(header, nr_header, (lang_selected?"data\\romana.lang":"data\\english.lang"));
+    loadLanguage(projectDir, (lang_selected?"data\\romana.lang":"data\\english.lang"), header, nr_header);
     resizeHeader(header, nr_header);
 
     headerBox = header[0].rect;
@@ -99,6 +110,7 @@ void loadLayout(dropdown header[], int &nr_header, struct rectangle &headerBox, 
     textBox = { 0, (headerBox.y + headerBox.height), WIDTH - lineSlider.rect.width, HEIGHT - (headerBox.y + headerBox.height + statusBarBox.height + colSlider.rect.height) };
 
     f.close();
+    SetCurrentDirectoryA(temp);
 }
 
 #endif // LOADING_H_INCLUDED

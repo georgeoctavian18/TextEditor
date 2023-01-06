@@ -25,8 +25,11 @@ int main()
     struct rectangle headerBox, statusBarBox, textBox;
     int lang_selected=0;
 
-    loadTheme("data\\light_theme.thm", &theme);
-    loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
+    char projectDir[1024];
+    GetCurrentDirectoryA(1024, projectDir);
+
+    loadTheme(projectDir, "data\\light_theme.thm", &theme);
+    loadLayout(projectDir, header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
 
     vector <string> Lines, CopiedLines;
     vector <int> EnterLines, EnterLinesCopied;
@@ -75,12 +78,12 @@ int main()
                 Command = getch();
                 if (Command == KEY_F4)
                 {
-                    SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected);
+                    SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected, projectDir);
                     setOptions(WindSizeX, WindSizeY);
                     setupFlags();
                     ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame);
                     settextstyle(Font, HORIZ_DIR, 2);
-                    loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
+                    loadLayout(projectDir, header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
                     header[0].isSelected = false;
                 }
                 else SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
@@ -110,17 +113,20 @@ int main()
                 SaveFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved);
                 break;
             case CTRLO:
-                OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved);
+                OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
                 break;
             case CTRLN:
-                NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved);
+                NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
                 break;
            default:
-                Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
-                for (int i=0; i<Lines.size(); i++)
-                    if (Lines[i].size()>maxi)
-                        maxi = Lines[i].size();
-                maxi = max(0, maxi-CharsPerLine);
+               if (Ch > 26 || Ch == TAB)
+               {
+                   Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
+                   for (int i = 0; i < Lines.size(); i++)
+                       if (Lines[i].size() > maxi)
+                           maxi = Lines[i].size();
+                   maxi = max(0, maxi - CharsPerLine);
+               }
             }
 
             a = c = PosX + CurrCol * CHAR_WIDTH;
@@ -139,9 +145,9 @@ int main()
         if (header[0].isSelected)
         {
             if (isClicked(header[0].options[0]))
-                clickedOnHeader = true, NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader = true, NewFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if (isClicked(header[0].options[1]))
-                clickedOnHeader = true, OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                clickedOnHeader = true, OpenFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if (isClicked(header[0].options[2]))
                 clickedOnHeader = true, SaveFile(CurrLine, CurrCol, CharsPerLine, Path, FileName, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             if (isClicked(header[0].options[3]))
@@ -160,11 +166,7 @@ int main()
             movePage(CurrLine, CurrCol, LineBeginFrame, ColBeginFrame, LineEndFrame, ColEndFrame, RowsPerFrame, CharsPerLine, Lines);
             lastCursorChanged=millis();
         }
-        /*
-        else
-            if (ColBeginFrame>maxi)
-                maxi = ColBeginFrame;
-        */
+
 
         if (header[1].isSelected)
         {
@@ -240,13 +242,13 @@ int main()
             if (isClicked(header[2].options[2]))
             {
                 clickedOnHeader = true;
-                SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected);
+                SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected, projectDir);
                 setOptions(WindSizeX, WindSizeY);
                 setupFlags();
                 ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame);
                 settextstyle(Font, HORIZ_DIR, 2);
-                loadLayout(header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
-                Resize = true; 
+                loadLayout(projectDir, header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
+                Resize = true;
                 SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
             }
         }
@@ -254,9 +256,9 @@ int main()
         if (header[3].isSelected)
         {
             if (isClicked(header[3].options[0]))
-                clickedOnHeader = true, loadTheme("data\\light_theme.thm", &theme);
+                clickedOnHeader = true, loadTheme(projectDir, "data\\light_theme.thm", &theme);
             if (isClicked(header[3].options[1]))
-                clickedOnHeader = true, loadTheme("data\\dark_theme.thm", &theme);
+                clickedOnHeader = true, loadTheme(projectDir, "data\\dark_theme.thm", &theme);
         }
 
         if (header[4].isSelected)
@@ -277,9 +279,9 @@ int main()
         if (header[5].isSelected)
         {
             if (isClicked(header[5].options[0]))
-                clickedOnHeader = true, lang_selected = 0, loadLanguage(header, nr_header, "data\\english.lang");
+                clickedOnHeader = true, lang_selected = 0, loadLanguage(projectDir, "data\\english.lang", header, nr_header);
             if (isClicked(header[5].options[1]))
-                clickedOnHeader = true, lang_selected = 1, loadLanguage(header, nr_header, "data\\romana.lang");
+                clickedOnHeader = true, lang_selected = 1, loadLanguage(projectDir, "data\\romana.lang", header, nr_header);
         }
 
         if (header[5].isSelected && clickedOnHeader)

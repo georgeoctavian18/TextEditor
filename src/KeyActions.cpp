@@ -259,7 +259,7 @@ void BackspaceKey(int& currLine, int& currCol, int charsPerLine, vector <string>
                             currLine = i + 1;
                             currCol = lines[i].size() - wordStart - 1;
 
-                            lines[i].erase(lines[i].begin() + wordStart, lines[i].end());
+                            lines[i].erase(lines[i].begin() + wordStart + 1, lines[i].end());
 
                         }
 

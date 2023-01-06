@@ -56,19 +56,17 @@ void clearFlags()
 
 int kindOfWord(char c)
 {
-    if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' || c == '_')
-        return 1;
+    //if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' || c == '_')
+        //return 1;
     if (c == ' ' || c=='\t')
         return 2;
-    return 3;
+    return 1;
 }
 
 vector2 mouseBeginPos;
 
 void clickOnText(int textBeginX, int textBeginY, int& CurrLine1, int& CurrCol1, int& CurrLine2, int& CurrCol2, int &LineBeginFrame, int &LineEndFrame, int &ColBeginFrame, int &ColEndFrame, vector<string>& Lines, vector<int> EnterLines, struct rectangle textScreen)
 {
-    //int textBeginY = HEIGHT / 10;
-    //int textBeginX = CHAR_WIDTH;
     vector2 mouse = { mousex(), mousey() };
 
     int i, j, si, sj, mini, maxi;
@@ -110,15 +108,15 @@ void clickOnText(int textBeginX, int textBeginY, int& CurrLine1, int& CurrCol1, 
             if (Lines[si][sj]=='\t')
             {
                 g = false;
-                for (j=sj; j>0 && !g; j--)
+                for (j=sj; j>=0 && !g; j--)
                     if (Lines[si][j]!='\t')
                         g = true;
                 for (i=si-1; i>=0 && i>mini && !g; i--)
                     for (j=Lines[i].size()-1; j>=0 && !g; j--)
-                        if (Lines[si][j]!='\t')
+                        if (Lines[i][j]!='\t')
                             g = true;
                 CurrLine1 = i+1;
-                CurrCol1 = (g?j+2:j);
+                CurrCol1 = max(0, (g?j+2:j));
 
                 i = CurrLine1;
                 j = CurrCol1;
@@ -155,7 +153,7 @@ void clickOnText(int textBeginX, int textBeginY, int& CurrLine1, int& CurrCol1, 
             CurrCol2 = (g?j-1:j);
 
             g = false;
-            for (j=sj; j>0 && !g; j--)
+            for (j=sj; j>=0 && !g; j--)
                 if (caz!=kindOfWord(Lines[si][j]))
                     g = true;
             for (i=si-1; i>=0 && i>mini && !g; i--)
@@ -193,15 +191,15 @@ void clickOnText(int textBeginX, int textBeginY, int& CurrLine1, int& CurrCol1, 
         if (Lines[si][sj]=='\t')
         {
             g = false;
-            for (j=sj; j>0 && !g; j--)
+            for (j=sj; j>=0 && !g; j--)
                 if (Lines[si][j]!='\t')
                     g = true;
             for (i=si-1; i>=0 && i>mini && !g; i--)
                 for (j=Lines[i].size()-1; j>=0 && !g; j--)
-                    if (Lines[si][j]!='\t')
+                    if (Lines[i][j]!='\t')
                         g = true;
             CurrLine2 = i+1;
-            CurrCol2 = (g?j+2:j);
+            CurrCol2 = max(0, (g?j+2:j));
 
             i = CurrLine2;
             j = CurrCol2;
