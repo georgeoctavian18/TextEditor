@@ -442,4 +442,13 @@ void display(slider &s){
     }
 }
 
+void updateMaxTextLength(int& maxi, vector <string>& Lines, int CharsPerLine, bool from_0)
+{
+    if (from_0)
+        maxi = 0;
+    for (int i=0; i<Lines.size(); i++)
+        if (Lines[i].size()>maxi)
+            maxi = Lines[i].size();
+}
+
 #endif // USER_INTERACTION_H_INCLUDED

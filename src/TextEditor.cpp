@@ -102,9 +102,11 @@ int main()
                 break;
             case CTRLV:
                 Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
+                updateMaxTextLength(maxi, Lines, CharsPerLine, false);
                 break;
             case CTRLZ:
                 Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, isSaved);
+                updateMaxTextLength(maxi, Lines, CharsPerLine, false);
                 break;
             case CTRLA:
                 SelectAll(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, KeepSelect);
@@ -122,10 +124,7 @@ int main()
                if (Ch > 26 || Ch == TAB)
                {
                    Insertion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Ch, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
-                   for (int i = 0; i < Lines.size(); i++)
-                       if (Lines[i].size() > maxi)
-                           maxi = Lines[i].size();
-                   maxi = max(0, maxi - CharsPerLine);
+                   updateMaxTextLength(maxi, Lines, CharsPerLine, false);
                }
             }
 
@@ -139,6 +138,9 @@ int main()
                 SelectBeginLine = CurrLine;
                 SelectBeginCol = CurrCol;
             }
+
+            if ((Ch==BS || Ch==CTRLX)&& (StackLines.empty()?false:Lines.size()!= StackLines.top().size()))
+                updateMaxTextLength(maxi, Lines, CharsPerLine, false);
         }
 
         clickedOnHeader=false;
@@ -158,32 +160,55 @@ int main()
 
         if ((header[0].isSelected && clickedOnHeader) || Ch==CTRLS || Ch==CTRLO || Ch==CTRLN)
         {
-            maxi = 0;
-            for (int i=0; i<Lines.size(); i++)
-                if (Lines[i].size()>maxi)
-                    maxi = Lines[i].size();
-            maxi = max(0, maxi-CharsPerLine);
+            updateMaxTextLength(maxi, Lines, CharsPerLine, true);
             movePage(CurrLine, CurrCol, LineBeginFrame, ColBeginFrame, LineEndFrame, ColEndFrame, RowsPerFrame, CharsPerLine, Lines);
             lastCursorChanged=millis();
         }
 
-
         if (header[1].isSelected)
         {
             if(isClicked(header[1].options[0]))
-                clickedOnHeader = true, Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            {
+                clickedOnHeader = true;
+                Undo(CurrLine, CurrCol, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                updateMaxTextLength(maxi, Lines, CharsPerLine, false);
+            }
             if(isClicked(header[1].options[1]))
-                clickedOnHeader = true, Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            {
+                clickedOnHeader = true;
+                Cut(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved);
+                SelectBeginLine = CurrLine;
+                SelectBeginCol = CurrCol;
+                if ((StackLines.empty()?false:Lines.size()!= StackLines.top().size()))
+                    updateMaxTextLength(maxi, Lines, CharsPerLine, false);
+            }
             if(isClicked(header[1].options[2]))
                 clickedOnHeader = true, Copy(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, EnterLines, CopiedLines, EnterLinesCopied, KeepSelect);
             if(isClicked(header[1].options[3]))
-                clickedOnHeader = true, Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            {
+                clickedOnHeader = true;
+                Paste(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved);
+                SelectBeginLine = CurrLine;
+                SelectBeginCol = CurrCol;
+                updateMaxTextLength(maxi, Lines, CharsPerLine, false);
+            }
             if(isClicked(header[1].options[4]))
-                clickedOnHeader = true, Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            {
+                clickedOnHeader = true;
+                Deletion(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, StackLines, StackEnterLines, StackLinCol, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+                if ((StackLines.empty()?false:Lines.size()!= StackLines.top().size()))
+                    updateMaxTextLength(maxi, Lines, CharsPerLine, false);
+            }
             if(isClicked(header[1].options[5]))
                 clickedOnHeader = true, SelectAll(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Lines, KeepSelect);
             if(isClicked(header[1].options[6]))
-                clickedOnHeader = true, DateTimeKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap, isSaved), SelectBeginLine = CurrLine, SelectBeginCol = CurrCol;
+            {
+                clickedOnHeader = true;
+                DateTimeKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap, isSaved);
+                SelectBeginLine = CurrLine;
+                SelectBeginCol = CurrCol;
+                updateMaxTextLength(maxi, Lines, CharsPerLine, false);
+            }
         }
 
         if (header[1].isSelected && clickedOnHeader)
@@ -214,10 +239,7 @@ int main()
                 }
                 else
                     UndoWordWrap(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines);
-                for (int i=0; i<Lines.size(); i++)
-                    if (Lines[i].size()>maxi)
-                        maxi = Lines[i].size();
-                maxi = max(0, maxi-CharsPerLine);
+                updateMaxTextLength(maxi, Lines, CharsPerLine, true);
 
 
                 colSlider.exists = !WordWrap;
@@ -301,7 +323,7 @@ int main()
         LineEndFrame = LineBeginFrame + (RowsPerFrame - 1);
 
 
-        colSlider.maxState = maxi;
+        colSlider.maxState = max(0, maxi-CharsPerLine);;
         colSlider.state = ColBeginFrame;
         clickHorizontalSlider(colSlider);
 
