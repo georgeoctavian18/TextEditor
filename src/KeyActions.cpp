@@ -87,9 +87,12 @@ void InsertKey(int& currLine, int& currCol, int charsPerLine, char ch, vector <s
 
                 int j = lines[i].size() - 1;
 
-                if (lines[i][j] == '\t')
+                if (lines[i][j] == '\t' || lines[i][j] == ' ')
                 {
-                    for (int it = 0; it <= 3; it++)
+                    int limit = 0;
+                    if (lines[i][j] == '\t') limit += 3;
+
+                    for (int it = 0; it <= limit; it++)
                     {
                         CharToString(s, lines[i].back());
                         lines[i].erase(lines[i].end() - 1);

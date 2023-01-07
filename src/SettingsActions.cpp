@@ -30,9 +30,12 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
 
             int j = lines[i].size() - 1;
 
-            if (lines[i][j] == '\t')
+            if (lines[i][j] == '\t' || lines[i][j] == ' ')
             {
-                for (int it = 0; it <= 3; it++)
+                int limit = 0;
+                if (lines[i][j] == '\t') limit += 3;
+
+                for (int it = 0; it <= limit; it++)
                 {
                     CharToString(s, lines[i].back());
                     lines[i].erase(lines[i].end() - 1);
@@ -41,6 +44,7 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
                 }
                 continue;
             }
+
 
             if ((spacePos == -1 || spacePos == charsPerLine) && (tabPos == charsPerLine || tabPos == -1))
             {
@@ -61,6 +65,7 @@ void DoWordWrap(int& currLine, int& currCol, int charsPerLine, vector <string>& 
                     lines[i + 1].insert(0, s);
                     j--;
                 }
+
             }
         }
         i++;
@@ -115,7 +120,11 @@ void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
     while (fin.getline(line, 1000))
     {
         for (int i = 0; i < strlen(line); i++)
-            InsertKey(currLine, currCol, charsPerLine, line[i], lines, enterLines, wordWrap);
+        {
+            if (line[i] == '\t')
+                TabKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
+            else InsertKey(currLine, currCol, charsPerLine, line[i], lines, enterLines, wordWrap);
+        }
         EnterKey(currLine, currCol, charsPerLine, lines, enterLines, wordWrap);
     }
     fin.close();
@@ -126,7 +135,6 @@ void OpenFile(int& currLine, int& currCol, int charsPerLine, char path[], char f
         stackEnterLines.pop();
     while (!stackLinCol.empty())
         stackLinCol.pop();
-
 }
 
 void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char fileName[], vector <string>& lines, vector <int>& enterLines, bool wordWrap, bool& isSaved)
@@ -141,7 +149,11 @@ void SaveAsFile(int& currLine, int& currCol, int charsPerLine, char path[], char
     ofstream fout(path);
     for (int i = 0; i < lines.size(); i++)
     {
-        fout << lines[i];
+        for (int j = 0; j < lines[i].size(); j++)
+        {
+            if (lines[i][j] == '\t') j += 3;
+            fout << lines[i][j];
+        }
         if(count(enterLines.begin(), enterLines.end(), i))
             fout << '\n';
     }
