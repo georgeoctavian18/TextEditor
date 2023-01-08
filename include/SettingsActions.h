@@ -18,4 +18,4 @@ void NewFile(int& currLine, int& currCol, int charsPerLine, char path[], char fi
 
 void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang, const char projectDir[]);
 
-void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int posX, int& posY, int& rowsPerFrame, int& charsPerLine, int& lineBeginFrame, int& lineEndFrame, int& colBeginFrame, int& colEndFrame);
+void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int posX, int& posY, int& rowsPerFrame, int& charsPerLine, int& lineBeginFrame, int& lineEndFrame, int& colBeginFrame, int& colEndFrame, bool wordWrap, vector <string>& lines, vector <int>& enterLines);

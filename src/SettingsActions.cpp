@@ -299,14 +299,14 @@ void SelectWindowSize(int& windSizeX, int& windSizeY, palette theme, int lang, c
         newWindX = stoi(stText, &sz);
         newWindY = stoi(ndText, &sz);
 
-        if (newWindX >= 100 && newWindX <= getmaxwidth() && newWindY >= 100 && newWindY <= getmaxheight())
+        if (newWindX >= 550 && newWindX <= getmaxwidth() && newWindY >= 300 && newWindY <= getmaxheight())
             windSizeX = newWindX, windSizeY = newWindY;
     }
 
     closegraph();
 }
 
-void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int posX, int& posY, int& rowsPerFrame, int& charsPerLine, int& lineBeginFrame, int& lineEndFrame, int& colBeginFrame, int& colEndFrame)
+void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int posX, int& posY, int& rowsPerFrame, int& charsPerLine, int& lineBeginFrame, int& lineEndFrame, int& colBeginFrame, int& colEndFrame, bool wordWrap, vector <string>& lines, vector <int>& enterLines)
 {
     currLine = 0, currCol = 0;
     posY = windSizeY / 10;
@@ -314,4 +314,7 @@ void ResizeWindow(int& currLine, int& currCol, int windSizeX, int windSizeY, int
     charsPerLine = (windSizeX - 4 * posX) / CHAR_WIDTH;
     lineBeginFrame = 0, lineEndFrame = rowsPerFrame - 1;
     colBeginFrame = 0, colEndFrame = charsPerLine;
+
+    if (wordWrap)
+        DoWordWrap(currLine, currCol, charsPerLine, lines, enterLines);
 }

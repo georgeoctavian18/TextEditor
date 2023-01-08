@@ -76,17 +76,7 @@ int main()
                 break;
             case 0:
                 Command = getch();
-                if (Command == KEY_F4)
-                {
-                    SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected, projectDir);
-                    setOptions(WindSizeX, WindSizeY);
-                    setupFlags();
-                    ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame);
-                    settextstyle(Font, HORIZ_DIR, 2);
-                    loadLayout(projectDir, header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
-                    header[0].isSelected = false;
-                }
-                else SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
+                SpecialKey(SelectBeginLine, SelectBeginCol, CurrLine, CurrCol, Command, CharsPerLine, Lines, EnterLines, CopiedLines, EnterLinesCopied, StackLines, StackEnterLines, StackLinCol, WordWrap, KeepSelect, isSaved, Font);
                 break;
             case CR:
                 EnterKey(CurrLine, CurrCol, CharsPerLine, Lines, EnterLines, WordWrap);
@@ -267,7 +257,7 @@ int main()
                 SelectWindowSize(WindSizeX, WindSizeY, theme, lang_selected, projectDir);
                 setOptions(WindSizeX, WindSizeY);
                 setupFlags();
-                ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame);
+                ResizeWindow(CurrLine, CurrCol, WindSizeX, WindSizeY, PosX, PosY, RowsPerFrame, CharsPerLine, LineBeginFrame, LineEndFrame, ColBeginFrame, ColEndFrame, WordWrap, Lines, EnterLines);
                 settextstyle(Font, HORIZ_DIR, 2);
                 loadLayout(projectDir, header, nr_header, headerBox, statusBarBox, lineSlider, colSlider, textBox, &theme, lang_selected);
                 Resize = true;
