@@ -36,3 +36,11 @@ The actions can be performed either by using the shortcut combinations, either b
 
 *BACKSPACE* -> Delete
 
+*ENTER* -> Inserts an Enter
+
+*TAB* -> Inserts a Tab
+
+*LEFT, RIGHT, UP, DOWN ARROWS* -> moving through the text
+
+# Demo
+https://youtu.be/md_AkgkGreE
