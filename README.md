@@ -1,6 +1,6 @@
 # About the Text Editor 
 
-The project consists in a Text Editor (something like Notepad) which has an unique design and lots of features: 
+The project consists in a Text Editor which has an unique design and similar features to Notepad/Vim: 
 
 -> all kinds of string manipulation
 
