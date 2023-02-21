@@ -8,7 +8,7 @@ The project consists in a Text Editor which has an unique design and similar fea
 
 -> different themes, languages, fonts
 
-It has been used only the C++ language and only the "graphics.h" library for the graphic part. 
+It has been developed using only the C++ language and only the "graphics.h" library for the graphic part. 
 
 # Shortcuts
 
